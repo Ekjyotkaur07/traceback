@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TraceBack – Smart Lost & Found Management System</title>
+  <meta name="description" content="A smart, modern platform to report and recover lost items efficiently." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <!--===========NAVBAR===========-->
+    <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a class="nav-brand" data-nav="home" href="#home">
+        <span class="brand-icon">◈</span>
+        <span class="brand-name">TraceBack</span>
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a class="nav-link active" data-nav="home" href="#home">Home</a></li>
+        <li><a class="nav-link" data-nav="dashboard" href="#dashboard">Dashboard</a></li>
+        <li><a class="nav-link" data-nav="browse" href="#browse">Browse</a></li>
+        <li><a class="nav-link" data-nav="report-lost" href="#report-lost">Report Lost</a></li>
+        <li><a class="nav-link" data-nav="report-found" href="#report-found">Report Found</a></li>
+      </ul>
+      <div class="nav-actions">
+        <div id="nav-user-area"></div>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+          <span id="theme-icon">🌙</span>
+        </button>
+        <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+    <!-- Mobile Drawer -->
+    <div class="mobile-drawer" id="mobile-drawer" aria-hidden="true">
+      <ul class="mobile-nav-links">
+        <li><a class="mobile-nav-link" data-nav="home" href="#home">🏠 Home</a></li>
+        <li><a class="mobile-nav-link" data-nav="dashboard" href="#dashboard">📊 Dashboard</a></li>
+        <li><a class="mobile-nav-link" data-nav="browse" href="#browse">🔍 Browse Items</a></li>
+        <li><a class="mobile-nav-link" data-nav="report-lost" href="#report-lost">📋 Report Lost</a></li>
+        <li><a class="mobile-nav-link" data-nav="report-found" href="#report-found">📦 Report Found</a></li>
+      </ul>
+      <div class="mobile-auth-row" id="mobile-auth-area"></div>
+    </div>
+  </nav>
+    <script src="script.js"></script>
+</body>
+</html>
