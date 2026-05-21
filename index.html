@@ -1,52 +1,692 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TraceBack – Smart Lost & Found Management System</title>
-  <meta name="description" content="A smart, modern platform to report and recover lost items efficiently." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TraceBack – Smart Lost & Found Registry</title>
+  <meta name="description" content="A premium, animated, multi-user lost and found portal."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-    <!--===========NAVBAR===========-->
-    <nav class="navbar" id="navbar">
-    <div class="nav-inner">
-      <a class="nav-brand" data-nav="home" href="#home">
-        <span class="brand-icon">◈</span>
-        <span class="brand-name">TraceBack</span>
-      </a>
-      <ul class="nav-links" id="nav-links">
-        <li><a class="nav-link active" data-nav="home" href="#home">Home</a></li>
-        <li><a class="nav-link" data-nav="dashboard" href="#dashboard">Dashboard</a></li>
-        <li><a class="nav-link" data-nav="browse" href="#browse">Browse</a></li>
-        <li><a class="nav-link" data-nav="report-lost" href="#report-lost">Report Lost</a></li>
-        <li><a class="nav-link" data-nav="report-found" href="#report-found">Report Found</a></li>
-      </ul>
-      <div class="nav-actions">
-        <div id="nav-user-area"></div>
-        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
-          <span id="theme-icon">🌙</span>
-        </button>
-        <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
-          <span></span><span></span><span></span>
-        </button>
+
+<!-- AMBIENT GLOW BACKDROPS -->
+<div class="ambient-glow glow-1" aria-hidden="true"></div>
+<div class="ambient-glow glow-2" aria-hidden="true"></div>
+
+<!-- PAGE LOADER Screen -->
+<div id="page-loader" class="page-loader">
+  <div class="loader-brand">
+    <span class="loader-icon">◈</span>
+    <span class="loader-name">TraceBack</span>
+  </div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+</div>
+
+<!-- STACKABLE TOAST NOTIFICATIONS -->
+<div id="toast-container" aria-live="polite"></div>
+
+<!-- ITEM DETAILS OVERLAY MODAL -->
+<div id="item-modal" class="modal-overlay" onclick="closeModal(event)" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModalDirect()" aria-label="Close">✕</button>
+    <div id="item-modal-content"></div>
+  </div>
+</div>
+
+<!-- ==========================================
+     NAVIGATIONAL HEADER
+     ========================================== -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a class="nav-brand" href="#home" onclick="showSection('home', this); return false;">
+      <span class="brand-icon">◈</span>
+      <span class="brand-name">TraceBack</span>
+    </a>
+    <ul class="nav-links">
+      <li><a class="nav-link active" id="nav-home" href="#home" onclick="showSection('home', this); return false;">Home</a></li>
+      <li><a class="nav-link" id="nav-browse" href="#browse" onclick="showSection('browse', this); return false;">Browse</a></li>
+      <li><a class="nav-link" id="nav-leaderboard" href="#leaderboard" onclick="showSection('leaderboard', this); return false;">Leaderboard</a></li>
+      <li><a class="nav-link" id="nav-report-lost" href="#report-lost" onclick="showSection('report-lost', this); return false;">Report Lost</a></li>
+      <li><a class="nav-link" id="nav-report-found" href="#report-found" onclick="showSection('report-found', this); return false;">Report Found</a></li>
+      <li><a class="nav-link" id="nav-contact" href="#contact" onclick="showSection('contact', this); return false;">Contact Us</a></li>
+      <li><a class="nav-link" id="nav-dashboard" href="#dashboard" onclick="showSection('dashboard', this); return false;">Dashboard</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Toggle theme">☀️</button>
+      <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <!-- Mobile Menu Drawer Toggle -->
+  <div class="mobile-drawer" id="mobileMenu" aria-hidden="true">
+    <ul class="mob-links">
+      <li><a href="#home" onclick="showSection('home'); return false;" class="mob-link">🏠 Home</a></li>
+      <li><a href="#browse" onclick="showSection('browse'); return false;" class="mob-link">🔍 Browse Registry</a></li>
+      <li><a href="#leaderboard" onclick="showSection('leaderboard'); return false;" class="mob-link">🏆 Leaderboard</a></li>
+      <li><a href="#report-lost" onclick="showSection('report-lost'); return false;" class="mob-link">📋 Report Lost</a></li>
+      <li><a href="#report-found" onclick="showSection('report-found'); return false;" class="mob-link">📦 Report Found</a></li>
+      <li><a href="#contact" onclick="showSection('contact'); return false;" class="mob-link">✉️ Contact Us</a></li>
+      <li><a href="#dashboard" onclick="showSection('dashboard'); return false;" class="mob-link">📊 Dashboard</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ==========================================
+     MAIN APP CONTAINER (SINGLE PAGE ARCHITECTURE)
+     ========================================== -->
+<main>
+
+  <!-- 1. HOME SECTION -->
+  <section id="home" class="page active">
+    <!-- Hero Box -->
+    <div class="hero">
+      <div class="hero-inner">
+        <div class="hero-text">
+          <div class="hero-pill">
+            <span class="pill-dot"></span>Smart Campus Lost &amp; Found
+          </div>
+          <h1 class="hero-h1">
+            Lost something?<br/>
+            <span class="gradient-text">TraceBack</span> finds it.
+          </h1>
+          <p class="hero-sub">
+            A high-end network platform designed to register, search, and reunite lost belongings with their owners. Fully responsive, highly animated, and powered by community collaboration.
+          </p>
+          <div class="hero-ctas">
+            <button class="btn btn-primary btn-lg" onclick="showSection('report-lost')">
+              <span class="btn-shine"></span>📋 Report Lost Item
+            </button>
+            <button class="btn btn-outline btn-lg" onclick="showSection('report-found')">
+              📦 I Found Something
+            </button>
+          </div>
+          <!-- Hero Counters -->
+          <div class="hero-stats">
+            <div class="hstat">
+              <span class="hstat-n" id="heroTotal">0</span>
+              <span class="hstat-l">Registered Items</span>
+            </div>
+            <div class="hstat-sep"></div>
+            <div class="hstat">
+              <span class="hstat-n" id="heroActive">0</span>
+              <span class="hstat-l">Active Cases</span>
+            </div>
+            <div class="hstat-sep"></div>
+            <div class="hstat">
+              <span class="hstat-n" id="heroReunited">0</span>
+              <span class="hstat-l">Reunited Cases</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Animated Hero Graphics -->
+        <div class="hero-visual" aria-hidden="true">
+          <div class="float-card fc1">
+            <span class="fc-ico">💻</span>
+            <div class="fc-info"><b>MacBook Pro 16"</b><span>Main Library · 2h ago</span></div>
+            <span class="badge lost">Lost</span>
+          </div>
+          <div class="float-card fc2">
+            <span class="fc-ico">💍</span>
+            <div class="fc-info"><b>Fossil Watch</b><span>Sports Hall · 1d ago</span></div>
+            <span class="badge found">Found</span>
+          </div>
+          <div class="float-card fc3">
+            <span class="fc-ico">🎒</span>
+            <div class="fc-info"><b>Leather Purse</b><span>Reunited today</span></div>
+            <span class="badge resolved">Resolved</span>
+          </div>
+          <div class="hero-ring-wrap">
+            <div class="hero-ring r1"></div>
+            <div class="hero-ring r2"></div>
+            <div class="hero-ring r3"></div>
+            <div class="hero-core">◈</div>
+          </div>
+        </div>
       </div>
     </div>
-    <!-- Mobile Drawer -->
-    <div class="mobile-drawer" id="mobile-drawer" aria-hidden="true">
-      <ul class="mobile-nav-links">
-        <li><a class="mobile-nav-link" data-nav="home" href="#home">🏠 Home</a></li>
-        <li><a class="mobile-nav-link" data-nav="dashboard" href="#dashboard">📊 Dashboard</a></li>
-        <li><a class="mobile-nav-link" data-nav="browse" href="#browse">🔍 Browse Items</a></li>
-        <li><a class="mobile-nav-link" data-nav="report-lost" href="#report-lost">📋 Report Lost</a></li>
-        <li><a class="mobile-nav-link" data-nav="report-found" href="#report-found">📦 Report Found</a></li>
-      </ul>
-      <div class="mobile-auth-row" id="mobile-auth-area"></div>
+
+    <!-- Features Section -->
+    <div class="features-wrap">
+      <div class="section-head center">
+        <span class="stag">System Benefits</span>
+        <h2>Unified Recovery Ecosystem</h2>
+      </div>
+      <div class="feat-grid">
+        <div class="feat-card show">
+          <div class="feat-ico-wrap">🔍</div>
+          <h3>Smart Search Engine</h3>
+          <p>Instantly filter the central registry by category, location tags, type, or date to locate matches.</p>
+        </div>
+        <div class="feat-card show">
+          <div class="feat-ico-wrap">📷</div>
+          <h3>Mandatory Found Photos</h3>
+          <p>Found reports require proof photographs to ensure authenticity and ease owner identification.</p>
+        </div>
+        <div class="feat-card show">
+          <div class="feat-ico-wrap">🏆</div>
+          <h3>Honor Leaderboard</h3>
+          <p>Honours volunteers who return items, fostering a helpful environment through ranking stars.</p>
+        </div>
+        <div class="feat-card show">
+          <div class="feat-ico-wrap">⚡</div>
+          <h3>Live Activity Stream</h3>
+          <p>Watch system logs refresh in real-time as reports are generated or resolved across campus.</p>
+        </div>
+        <div class="feat-card show">
+          <div class="feat-ico-wrap">🛡️</div>
+          <h3>Secure Claim Flow</h3>
+          <p>Items match through direct developer-mediated confirmation panels and contact lists.</p>
+        </div>
+        <div class="feat-card show">
+          <div class="feat-ico-wrap">🌓</div>
+          <h3>Responsive Dark Mode</h3>
+          <p>Optimized typography and harmonic palettes that toggle smoothly to fit your time of day.</p>
+        </div>
+      </div>
     </div>
-  </nav>
-    <script src="script.js"></script>
+
+    <!-- Recent Activity Section -->
+    <div class="recent-wrap">
+      <div class="section-head space-between">
+        <div>
+          <span class="stag">Recent Registry Activity</span>
+          <h2>Latest Reported Items</h2>
+        </div>
+        <button class="btn btn-ghost" onclick="showSection('browse')">View All Registry →</button>
+      </div>
+      
+      <!-- Home Grid -->
+      <div class="items-grid" id="homeGrid"></div>
+    </div>
+
+    <!-- Bottom CTA Bar -->
+    <div class="cta-band">
+      <div class="cta-orb co1" aria-hidden="true"></div>
+      <div class="cta-orb co2" aria-hidden="true"></div>
+      <div class="cta-text">
+        <h2>Still missing your item?</h2>
+        <p>Post a quick record in the shared database — it might have been picked up already.</p>
+      </div>
+      <div class="cta-btns">
+        <button class="btn btn-white" onclick="showSection('report-lost')">📋 Report Lost</button>
+        <button class="btn btn-outline-white" onclick="showSection('report-found')">📦 Report Found</button>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 2. BROWSE SECTION -->
+  <section id="browse" class="page">
+    <div class="page-hd">
+      <h2 class="page-title">Browse Registry</h2>
+      <p class="page-sub">Query all public records on campus using multi-layer dynamic filtering</p>
+    </div>
+
+    <div class="local-notice" role="note">
+      <span>💡</span>
+      <p>This is a <strong>Shared Active Portal</strong>. Simulated activities run in the background to show how multi-user operations update the leaderboard and list feeds in real time!</p>
+    </div>
+
+    <!-- Filter Layout -->
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <span class="s-ico">🔍</span>
+        <input type="search" id="browseSearch" class="search-inp" placeholder="Search by name, tags, description, location..." autocomplete="off"/>
+        <button class="s-clear" onclick="clearSearch()" aria-label="Clear Search">✕</button>
+      </div>
+      <div class="filter-row">
+        <div class="select-wrapper">
+          <select id="filterType" class="fsel">
+            <option value="">All Types</option>
+            <option value="lost">Lost Reports</option>
+            <option value="found">Found Reports</option>
+          </select>
+        </div>
+        <div class="select-wrapper">
+          <select id="filterCategory" class="fsel">
+            <option value="">All Categories</option>
+            <option>ID Card / Documents</option>
+            <option>Wallet / Purse</option>
+            <option>Mobile Phone</option>
+            <option>Keys</option>
+            <option>Earphones / Headphones</option>
+            <option>Bag / Backpack</option>
+            <option>Laptop / Tablet</option>
+            <option>Clothing / Accessories</option>
+            <option>Books / Stationery</option>
+            <option>Glasses / Sunglasses</option>
+            <option>Jewellery / Watch</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="select-wrapper">
+          <select id="filterStatus" class="fsel">
+            <option value="">All Statuses</option>
+            <option value="Unclaimed">Active (Unclaimed)</option>
+            <option value="Claimed">Claimed / Verification</option>
+            <option value="Resolved">Resolved (Reunited)</option>
+          </select>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="resetFilters()">Reset Filters</button>
+      </div>
+    </div>
+
+    <p class="results-info" id="browseInfo">Showing 0 items</p>
+    <div class="items-grid" id="browseGrid"></div>
+  </section>
+
+
+  <!-- 3. LEADERBOARD SECTION (NEW FEATURE) -->
+  <section id="leaderboard" class="page">
+    <div class="page-hd">
+      <h2 class="page-title">Community Leaderboard</h2>
+      <p class="page-sub">Shining a spotlight on members who help return lost items to their owners</p>
+    </div>
+
+    <!-- Leaderboard Top 3 Podiums -->
+    <div class="podium-row" id="leaderPodium"></div>
+
+    <!-- Rank List Table -->
+    <div class="dash-table-wrap">
+      <div class="dash-table-head">
+        <h3>Finder Rankings</h3>
+        <span class="tag resolved">🌟 Active Volunteers</span>
+      </div>
+      <div class="table-scroll">
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Volunteer Finder</th>
+              <th>Status Badge</th>
+              <th>Items Reported</th>
+              <th>Successful Returns</th>
+              <th>Contribution Points</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Scoring Rules Info Card -->
+    <div class="local-notice" style="margin-top: 2rem; border-color: rgba(139,92,246,.3); background: var(--res-bg);">
+      <span>✨</span>
+      <div>
+        <h4 style="font-weight: 700; margin-bottom: 4px; color: var(--res-c);">How are points calculated?</h4>
+        <p style="font-size: 0.82rem; line-height: 1.5;">Each reported found item grants **10 points**. Helping reunite an item with its owner and resolving the ticket awards an additional **50 points**! Join the rankings today.</p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 4. REPORT LOST FORM SECTION -->
+  <section id="report-lost" class="page">
+    <div class="form-wrapper">
+      <div class="form-header">
+        <div class="form-icon-header lost-color">🔴</div>
+        <h2>Report Lost Item</h2>
+        <p>Register your missing item inside the shared system database to search for matches.</p>
+      </div>
+
+      <div class="form-card">
+        <form id="lostForm" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="l-name">Item Name <span class="required">*</span></label>
+              <input type="text" id="l-name" placeholder="e.g. Leather Bifold Wallet" required />
+              <span class="field-error" id="l-name-err">Please enter the item name.</span>
+            </div>
+            <div class="form-group">
+              <label for="l-category">Category <span class="required">*</span></label>
+              <div class="select-wrapper">
+                <select id="l-category" required>
+                  <option value="">Select Category</option>
+                  <option>ID Card / Documents</option>
+                  <option>Wallet / Purse</option>
+                  <option>Mobile Phone</option>
+                  <option>Keys</option>
+                  <option>Earphones / Headphones</option>
+                  <option>Bag / Backpack</option>
+                  <option>Laptop / Tablet</option>
+                  <option>Clothing / Accessories</option>
+                  <option>Books / Stationery</option>
+                  <option>Glasses / Sunglasses</option>
+                  <option>Jewellery / Watch</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <span class="field-error" id="l-category-err">Please select a category.</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="l-desc">Item Details &amp; Markings <span class="required">*</span></label>
+            <textarea id="l-desc" placeholder="Describe color, brand, distinct marks, or contents. (Max 400 chars)" maxlength="400" required></textarea>
+            <span class="field-error" id="l-desc-err">Please provide a descriptive explanation.</span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="l-location">Last Seen Location <span class="required">*</span></label>
+              <input type="text" id="l-location" placeholder="e.g. Canteen corner tables" required />
+              <span class="field-error" id="l-location-err">Please provide the location.</span>
+            </div>
+            <div class="form-group">
+              <label for="l-date">Date Lost <span class="required">*</span></label>
+              <input type="date" id="l-date" required />
+              <span class="field-error" id="l-date-err">Please select the approximate date.</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="l-email">Your Email <span class="required">*</span></label>
+              <input type="email" id="l-email" placeholder="student@university.edu" required />
+              <span class="field-error" id="l-email-err">Please provide a valid email address.</span>
+            </div>
+            <div class="form-group">
+              <label for="l-phone">Phone Number <span class="optional">(optional)</span></label>
+              <input type="tel" id="l-phone" placeholder="e.g. +91 9876543210" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Item Photograph <span class="optional">(optional)</span></label>
+            <div class="photo-upload-area" id="l-drop">
+              <input type="file" id="l-photo" class="file-input-field" accept="image/*" />
+              <div id="l-drop-instructions">
+                <div class="upload-icon-pulse">📷</div>
+                <p><span class="highlight">Click to select</span> or drag files here</p>
+                <small>PNG, JPG or WEBP formats up to 3MB limit</small>
+              </div>
+              <div class="photo-preview-wrap" id="l-preview-wrap" style="display: none;">
+                <img id="l-preview" src="" alt="Thumbnail Preview"/>
+                <button type="button" class="remove-photo-btn" onclick="removePhoto('l'); event.stopPropagation();">✕ Remove</button>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full btn-submit" style="margin-top: 1.5rem;">
+            Submit Lost Report ⟳
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 5. REPORT FOUND FORM SECTION -->
+  <section id="report-found" class="page">
+    <div class="form-wrapper">
+      <div class="form-header">
+        <div class="form-icon-header found-color">🟢</div>
+        <h2>Report Found Item</h2>
+        <p>Found something? Help return it by logging its specifications details.</p>
+      </div>
+
+      <div class="form-card">
+        <form id="foundForm" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="f-name">Item Name <span class="required">*</span></label>
+              <input type="text" id="f-name" placeholder="e.g. Gold Rim Sunglasses" required />
+              <span class="field-error" id="f-name-err">Please enter the item name.</span>
+            </div>
+            <div class="form-group">
+              <label for="f-category">Category <span class="required">*</span></label>
+              <div class="select-wrapper">
+                <select id="f-category" required>
+                  <option value="">Select Category</option>
+                  <option>ID Card / Documents</option>
+                  <option>Wallet / Purse</option>
+                  <option>Mobile Phone</option>
+                  <option>Keys</option>
+                  <option>Earphones / Headphones</option>
+                  <option>Bag / Backpack</option>
+                  <option>Laptop / Tablet</option>
+                  <option>Clothing / Accessories</option>
+                  <option>Books / Stationery</option>
+                  <option>Glasses / Sunglasses</option>
+                  <option>Jewellery / Watch</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <span class="field-error" id="f-category-err">Please select a category.</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="f-desc">Description of Condition &amp; Details <span class="required">*</span></label>
+            <textarea id="f-desc" placeholder="Describe where it was resting, current condition, and visual identification parameters. (Max 400 chars)" maxlength="400" required></textarea>
+            <span class="field-error" id="f-desc-err">Please enter a description.</span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="f-location">Where Found <span class="required">*</span></label>
+              <input type="text" id="f-location" placeholder="e.g. Block A Auditorium foyer" required />
+              <span class="field-error" id="f-location-err">Please state the location found.</span>
+            </div>
+            <div class="form-group">
+              <label for="f-date">Date Found <span class="required">*</span></label>
+              <input type="date" id="f-date" required />
+              <span class="field-error" id="f-date-err">Please enter the date.</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="f-email">Your Contact Email <span class="required">*</span></label>
+              <input type="email" id="f-email" placeholder="helper@university.edu" required />
+              <span class="field-error" id="f-email-err">Please enter a valid email address.</span>
+            </div>
+            <div class="form-group">
+              <label for="f-phone">Phone Number <span class="optional">(optional)</span></label>
+              <input type="tel" id="f-phone" placeholder="e.g. +91 9999912345" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Item Photograph <span class="required">*</span> <span class="req-note">— Proof required for Found items</span></label>
+            <div class="photo-upload-area" id="f-drop">
+              <input type="file" id="f-photo" class="file-input-field" accept="image/*" required />
+              <div id="f-drop-instructions">
+                <div class="upload-icon-pulse">📸</div>
+                <p><span class="highlight">Click to select</span> or drag files here</p>
+                <small>PNG, JPG or WEBP formats up to 3MB limit</small>
+              </div>
+              <div class="photo-preview-wrap" id="f-preview-wrap" style="display: none;">
+                <img id="f-preview" src="" alt="Found Image Preview"/>
+                <button type="button" class="remove-photo-btn" onclick="removePhoto('f'); event.stopPropagation();">✕ Remove</button>
+              </div>
+            </div>
+            <span class="field-error" id="f-photo-err">Photo proof is mandatory for found submissions.</span>
+          </div>
+
+          <button type="submit" class="btn btn-found btn-full btn-submit" style="margin-top: 1.5rem;">
+            Submit Found Report ⟳
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 6. CONTACT US SECTION (NEW FEATURE) -->
+  <section id="contact" class="page">
+    <div class="page-hd">
+      <h2 class="page-title">Contact Office</h2>
+      <p class="page-sub">Need help verifying an item? Get in touch with the admin support office</p>
+    </div>
+
+    <div class="contact-grid">
+      <!-- Contact details -->
+      <div class="contact-info-card">
+        <h3>TraceBack Central Office</h3>
+        <p class="desc-para">For physical verification, reclaiming locked items, or reporting suspicious listings, please contact our support team or visit us.</p>
+        
+        <div class="contact-details-list">
+          <div class="detail-item">
+            <span class="icon">📍</span>
+            <div>
+              <strong>Office Location</strong>
+              <span>Main Building, Room 102 (Ground Floor), Campus Center</span>
+            </div>
+          </div>
+          <div class="detail-item">
+            <span class="icon">⏰</span>
+            <div>
+              <strong>Opening Hours</strong>
+              <span>Monday – Friday | 9:00 AM – 5:00 PM</span>
+            </div>
+          </div>
+          <div class="detail-item">
+            <span class="icon">✉️</span>
+            <div>
+              <strong>Support Email</strong>
+              <span>traceback-support@university.edu</span>
+            </div>
+          </div>
+          <div class="detail-item">
+            <span class="icon">📞</span>
+            <div>
+              <strong>Phone Helpline</strong>
+              <span>+91 11 2670 4102</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inquiry form -->
+      <div class="form-card">
+        <h3>Send Support Message</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">We usually respond to inquiry tickets within 24 hours.</p>
+        
+        <form id="contactForm" novalidate>
+          <div class="form-group">
+            <label for="c-name">Full Name <span class="required">*</span></label>
+            <input type="text" id="c-name" placeholder="e.g. Rohan Sen" required />
+            <span class="field-error" id="c-name-err">Please enter your name.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="c-email">Email Address <span class="required">*</span></label>
+            <input type="email" id="c-email" placeholder="rohan.sen@gmail.com" required />
+            <span class="field-error" id="c-email-err">Please enter a valid email.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="c-type">Inquiry Type <span class="required">*</span></label>
+            <div class="select-wrapper">
+              <select id="c-type" required>
+                <option value="">Select Inquiry Type</option>
+                <option value="Verify Claim">Reclaim Verification Inquiry</option>
+                <option value="Report Listing">Report Incorrect/False Listing</option>
+                <option value="General Help">General Tech Support</option>
+                <option value="Other">Other Issues</option>
+              </select>
+            </div>
+            <span class="field-error" id="c-type-err">Please select inquiry type.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="c-message">Your Message <span class="required">*</span></label>
+            <textarea id="c-message" placeholder="Provide ticket numbers, transaction logs, or details of your query." required></textarea>
+            <span class="field-error" id="c-message-err">Please write your message.</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full">
+            Submit Support Request ✉️
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 7. DASHBOARD SECTION -->
+  <section id="dashboard" class="page">
+    <div class="page-hd">
+      <h2 class="page-title">Developer Dashboard</h2>
+      <p class="page-sub">Inspect and moderate reported logs from your local browser</p>
+    </div>
+
+    <!-- Stats summary grid -->
+    <div class="dash-row" id="dashStats"></div>
+
+    <!-- Logs Table -->
+    <div class="dash-table-wrap" style="margin-top: 2rem;">
+      <div class="dash-table-head">
+        <h3>Registry Reports Database</h3>
+        <button class="btn btn-ghost btn-sm" onclick="clearAllUserData()" style="color: var(--primary-lost);">🗑 Clear All Items</button>
+      </div>
+      
+      <div class="table-scroll">
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>Item Name</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Location</th>
+              <th>Date</th>
+              <th>Reporter</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="dashTbody"></tbody>
+        </table>
+      </div>
+      
+      <!-- Table empty state fallback -->
+      <div class="empty-state" id="dashEmpty" style="display: none;">
+        <div class="es-icon">📋</div>
+        <h3>No reports registered</h3>
+        <p>Items you log inside the forms will appear in this database grid.</p>
+      </div>
+    </div>
+
+    <!-- Active System Activity Feed Logs -->
+    <div class="dash-activity-grid" style="margin-top: 2rem;">
+      <div class="dash-table-wrap">
+        <div class="dash-table-head">
+          <h3>Live System Event Stream</h3>
+          <span class="badge resolved">● Network Active</span>
+        </div>
+        <div class="activity-feed-panel" id="dashActivity"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ==========================================
+     FOOTER MODULE
+     ========================================== -->
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <span class="brand-icon">◈</span>
+    <span class="footer-title">TraceBack Portal</span>
+    <p>Premium HTML5 + CSS3 + Pure JS Web Application.</p>
+    <div class="footer-links">
+      <a href="#home" onclick="showSection('home'); return false;">Home</a>
+      <a href="#browse" onclick="showSection('browse'); return false;">Browse Registry</a>
+      <a href="#leaderboard" onclick="showSection('leaderboard'); return false;">Leaderboard</a>
+      <a href="#report-lost" onclick="showSection('report-lost'); return false;">Report Lost</a>
+      <a href="#report-found" onclick="showSection('report-found'); return false;">Report Found</a>
+      <a href="#contact" onclick="showSection('contact'); return false;">Contact Support</a>
+      <a href="#dashboard" onclick="showSection('dashboard'); return false;">Dashboard</a>
+    </div>
+    <div class="site-footer-copy">© 2026 TraceBack Ecosystem. Built with harmony.</div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
 </body>
 </html>
