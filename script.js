@@ -1295,7 +1295,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (filterStatus) filterStatus.addEventListener('change', renderBrowseFeed);
 
   // Seed session mock items (generated dynamically rather than static hardcoded)
-  seedInitialSessionData();
+  //seedInitialSessionData();
 
   renderHomeFeed();
 
