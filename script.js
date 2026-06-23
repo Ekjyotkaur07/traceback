@@ -3,7 +3,8 @@
 // ==========================================================================
 
 const DATABASE_KEY = 'traceback_items_v4';
-
+const JSONBIN_ID  = '6a115d9a6610dd3ae8907122';
+const JSONBIN_KEY = '$2a$10$UyjgA1CZ0XZtRql8RhKS5.xJvUb645ZQVwE/FTrCXy2bpf9bvta7G';
 // Emojis mapping for categories
 const CATEGORY_EMOJIS = {
   'ID Card / Documents': '🪪',
@@ -1309,3 +1310,143 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // startBackgroundSim(); // Disabled periodic simulated item generation loop
 });
+// ===== BACK TO TOP =====
+const backToTopBtn = document.getElementById('backToTopBtn');
+
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 300) {
+    backToTopBtn.classList.add('visible');
+  } else {
+    backToTopBtn.classList.remove('visible');
+  }
+});
+
+backToTopBtn.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+// ===== DYNAMIC HERO FLOAT CARDS =====
+function getItemEmoji(category) {
+  const map = {
+    electronics: '💻', jewelry: '💍', bags: '🎒', clothing: '👕',
+    keys: '🗝️', wallet: '👛', books: '📚', sports: '⚽',
+    accessories: '🕶️', documents: '📄', pets: '🐾'
+  };
+  return map[(category || '').toLowerCase()] || '📦';
+}
+
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
+}
+
+function renderHeroFloatCards() {
+  const all = getAllItems(); // uses your existing function
+  if (!all || all.length === 0) return;
+
+  // Sort by date descending, take latest 3
+  const latest = [...all]
+    .sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt))
+    .slice(0, 3);
+
+  const slots = [
+    document.querySelector('.float-card.fc1'),
+    document.querySelector('.float-card.fc2'),
+    document.querySelector('.float-card.fc3')
+  ];
+
+  latest.forEach((item, i) => {
+    if (!slots[i]) return;
+    const status = (item.status || item.type || 'lost').toLowerCase();
+    const badgeClass = status === 'found' ? 'found' : status === 'resolved' ? 'resolved' : 'lost';
+    const badgeLabel = badgeClass.charAt(0).toUpperCase() + badgeClass.slice(1);
+
+    slots[i].innerHTML = `
+      <span class="fc-ico">${getItemEmoji(item.category)}</span>
+      <div class="fc-info">
+        <b>${item.title || item.name || 'Unknown Item'}</b>
+        <span>${item.location || 'Unknown location'} · ${timeAgo(item.date || item.createdAt)}</span>
+      </div>
+      <span class="badge ${badgeClass}">${badgeLabel}</span>
+    `;
+  });
+}
+
+// Refresh cards on home load and every 20s to stay in sync with sim ticker
+renderHeroFloatCards();
+setInterval(renderHeroFloatCards, 20000);
+
+// ===== CONTRIBUTE PAGE =====
+async function renderContributePage() {
+  await Promise.all([fetchOpenIssues(), fetchContributors()]);
+}
+
+async function fetchOpenIssues() {
+  const container = document.getElementById('openIssuesList');
+  const badge = document.getElementById('issuesCountBadge');
+  if (!container) return;
+
+  try {
+    const res = await fetch('https://api.github.com/repos/Ekjyotkaur07/traceback/issues?state=open&per_page=12');
+    const issues = await res.json();
+
+    if (!Array.isArray(issues) || issues.length === 0) {
+      container.innerHTML = '<p class="contrib-loading">No open issues right now. Check back soon!</p>';
+      if (badge) badge.textContent = '0';
+      return;
+    }
+
+    if (badge) badge.textContent = issues.length;
+
+    container.innerHTML = issues.map(issue => `
+      <a class="issue-card" href="${issue.html_url}" target="_blank" rel="noopener">
+        <div class="issue-card-title">#${issue.number} — ${issue.title}</div>
+        <div class="issue-labels">
+          ${issue.labels.map(l => `
+            <span class="issue-label" style="color:#${l.color}; border-color:#${l.color}; background:#${l.color}18">
+              ${l.name}
+            </span>`).join('')}
+        </div>
+        <div class="issue-card-meta">Opened by @${issue.user.login} · ${new Date(issue.created_at).toLocaleDateString()}</div>
+      </a>
+    `).join('');
+  } catch (e) {
+    container.innerHTML = '<p class="contrib-loading">Could not load issues. <a href="https://github.com/Ekjyotkaur07/traceback/issues" target="_blank">View on GitHub →</a></p>';
+  }
+}
+
+async function fetchContributors() {
+  const container = document.getElementById('contributorsList');
+  if (!container) return;
+
+  try {
+    const res = await fetch('https://api.github.com/repos/Ekjyotkaur07/traceback/contributors');
+    const contributors = await res.json();
+
+    if (!Array.isArray(contributors) || contributors.length === 0) {
+      container.innerHTML = '<p class="contrib-loading">Be the first contributor! 🚀</p>';
+      return;
+    }
+
+    container.innerHTML = contributors.map(c => `
+      <a class="contrib-avatar-card" href="${c.html_url}" target="_blank" rel="noopener">
+        <img src="${c.avatar_url}" alt="${c.login}" loading="lazy"/>
+        <span>@${c.login}</span>
+        <span class="contrib-contributions">${c.contributions} commit${c.contributions > 1 ? 's' : ''}</span>
+      </a>
+    `).join('');
+  } catch (e) {
+    container.innerHTML = '<p class="contrib-loading">Could not load contributors. <a href="https://github.com/Ekjyotkaur07/traceback/contributors" target="_blank">View on GitHub →</a></p>';
+  }
+}
+
+// Hook into SPA router — call when contribute section becomes active
+const _origShowSection = showSection;
+window.showSection = function(id) {
+  _origShowSection(id);
+  if (id === 'contribute') renderContributePage();
+};
