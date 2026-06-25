@@ -1,12 +1,18 @@
+'use strict';
+
 /* ══════════════════════════════════════════
    auth.js — TraceBack Login / Signup System
    Pure vanilla JS. No Firebase needed.
    Users stored in localStorage: tb_users
    Logged-in user: tb_current_user
 ══════════════════════════════════════════ */
+const EMAILJS_KEY      = 'lMVTSQcW_5ej4Gk7Q';
+const EMAILJS_SERVICE  = 'service_7cyyqhq';
+const EMAILJS_TEMPLATE = 'template_htxwoin';
 
-'use strict';
-
+if (typeof emailjs !== 'undefined') {
+  emailjs.init('YOUR_PUBLIC_KEY');
+}
 /* ── State ── */
 let pendingOTP      = null;
 let pendingUserData = null;
@@ -89,16 +95,11 @@ function wireAuthModal() {
    Blocks browsing/reporting unless logged in
 ══════════════════════════════ */
 function initAccessControl() {
-  // Sections that require login
-  const protectedSections = ['browse', 'report-lost', 'report-found', 'leaderboard', 'dashboard', 'contact'];
-
-  // Intercept ALL nav link clicks and CTA buttons
+const protectedSections = ['browse', 'report-lost', 'report-found', 'leaderboard', 'dashboard', 'contact'];
   document.addEventListener('click', e => {
-    // Check if click is on any nav link or button that opens a protected section
     const link = e.target.closest('a[href], button[onclick]');
     if (!link) return;
 
-    // Get the target section from href or onclick
     const href    = link.getAttribute('href') || '';
     const onclick = link.getAttribute('onclick') || '';
     const sectionMatch = href.replace('#','') || onclick.match(/showSection\(['"](\w[\w-]*)['"]/)?.[ 1];
@@ -106,20 +107,19 @@ function initAccessControl() {
     if (!sectionMatch) return;
     if (!protectedSections.includes(sectionMatch)) return;
 
-    // If not logged in, block and show auth modal
     if (!getCurrentUser()) {
       e.preventDefault();
       e.stopPropagation();
       openAuthModal();
       showAuthToast('Please login or sign up to continue 🔒', 'warning');
     }
-  }, true); // useCapture=true so it fires before your existing onclick handlers
+  }, true);
 }
+
 /* ══════════════════════════════
    TABS & METHODS
 ══════════════════════════════ */
 function wireTabsAndMethods() {
-  // Login / Signup tabs
   document.querySelectorAll('.atab').forEach(tab => {
     tab.addEventListener('click', () => {
       activeTab = tab.dataset.tab;
@@ -127,11 +127,10 @@ function wireTabsAndMethods() {
       document.getElementById('panel-login')?.classList.toggle('active',  activeTab === 'login');
       document.getElementById('panel-signup')?.classList.toggle('active', activeTab === 'signup');
       resetOTPSteps();
-      setMethod('email'); // reset to email on tab switch
+      setMethod('email');
     });
   });
 
-  // Email / Phone method buttons
   document.querySelectorAll('.meth').forEach(btn => {
     btn.addEventListener('click', () => setMethod(btn.dataset.method));
   });
@@ -139,15 +138,12 @@ function wireTabsAndMethods() {
 
 function setMethod(method) {
   activeMethod = method;
-  // Update all method buttons
   document.querySelectorAll('.meth').forEach(b => b.classList.toggle('active', b.dataset.method === method));
 
   const isLogin = activeTab === 'login';
   const panel   = isLogin ? 'panel-login' : 'panel-signup';
 
-  // Hide all aforms in current panel
   document.querySelectorAll(`#${panel} .aform`).forEach(f => f.classList.remove('active'));
-  // Show correct one
   const formId = method === 'email'
     ? (isLogin ? 'login-email-form'  : 'signup-email-form')
     : (isLogin ? 'login-phone-form'  : 'signup-phone-form');
@@ -165,8 +161,8 @@ function wirePasswordStrength() {
   if (!inp || !fill || !label) return;
 
   inp.addEventListener('input', () => {
-    const pw    = inp.value;
-    let score   = 0;
+    const pw  = inp.value;
+    let score = 0;
     if (pw.length >= 6)            score++;
     if (pw.length >= 10)           score++;
     if (/[A-Z]/.test(pw))         score++;
@@ -196,7 +192,7 @@ function wirePasswordToggles() {
     btn.addEventListener('click', () => {
       const inp = document.getElementById(btn.dataset.target);
       if (!inp) return;
-      inp.type   = inp.type === 'password' ? 'text' : 'password';
+      inp.type        = inp.type === 'password' ? 'text' : 'password';
       btn.textContent = inp.type === 'password' ? '👁' : '🙈';
     });
   });
@@ -221,7 +217,9 @@ function wireOTPBoxes() {
       box.addEventListener('paste', e => {
         e.preventDefault();
         const pasted = e.clipboardData.getData('text').replace(/\D/g,'').slice(0, 6);
-        pasted.split('').forEach((ch, j) => { if (boxes[j]) { boxes[j].value = ch; boxes[j].classList.add('done'); } });
+        pasted.split('').forEach((ch, j) => {
+          if (boxes[j]) { boxes[j].value = ch; boxes[j].classList.add('done'); }
+        });
         if (boxes[pasted.length - 1]) boxes[pasted.length - 1].focus();
       });
     });
@@ -243,8 +241,6 @@ function wireResendButtons() {
     btn.addEventListener('click', () => {
       const otp = generateOTP();
       pendingOTP = otp;
-      // In production this would hit an SMS API
-      // For demo we show it in a toast
       showAuthToast(`Demo OTP: ${otp}`, 'info', 8000);
       console.info('%c[TraceBack OTP] ' + otp, 'color:#0ea5e9;font-size:1.2rem;font-weight:bold');
       startCountdown(btn, 30);
@@ -274,7 +270,7 @@ function wireForms() {
   document.getElementById('verify-signup-otp')?.addEventListener('click',  () => handleOTPVerify('signup'));
 }
 
-/* Email Login */
+/* ── Email Login ── */
 function handleEmailLogin(e) {
   e.preventDefault();
   const email = document.getElementById('li-email').value.trim();
@@ -283,22 +279,25 @@ function handleEmailLogin(e) {
 
   if (!isEmail(email)) { setAerr('err-li-email', 'Enter a valid email'); ok = false; }
   else clearAerr('err-li-email');
-  if (pw.length < 6)  { setAerr('err-li-pw', 'Password must be 6+ characters'); ok = false; }
+  if (pw.length < 6)   { setAerr('err-li-pw', 'Password must be 6+ characters'); ok = false; }
   else clearAerr('err-li-pw');
   if (!ok) return;
 
-  // Look up stored user (or create a session for any valid combo)
+  // FIX: Reject login if credentials don't match — don't fall back to a derived name
   const users = getUsers();
   const found = users.find(u => u.email === email && u.pw === pw);
-  const name  = found ? found.name : email.split('@')[0];
+  if (!found) {
+    setAerr('err-li-pw', 'Incorrect email or password');
+    return;
+  }
 
-  setCurrentUser({ name, email, method: 'email' });
+  setCurrentUser({ name: found.name, email: found.email, phone: found.phone || null, method: 'email' });
   closeAuthModal();
   renderNavAuth();
-  showAuthToast(`Welcome back, ${name}! 👋`, 'success');
+  showAuthToast(`Welcome back, ${found.name}! 👋`, 'success');
 }
 
-/* Email Signup */
+/* ── Email Signup ── */
 function handleEmailSignup(e) {
   e.preventDefault();
   const name  = document.getElementById('su-name').value.trim();
@@ -307,14 +306,20 @@ function handleEmailSignup(e) {
   const phone = document.getElementById('su-ph-email').value.replace(/\D/g, '');
   let ok = true;
 
-  if (!name)           { setAerr('err-su-name',     'Name is required');              ok = false; } else clearAerr('err-su-name');
-  if (!isEmail(email)) { setAerr('err-su-email',    'Enter a valid email');            ok = false; } else clearAerr('err-su-email');
-  if (phone.length !== 10) { setAerr('err-su-ph-email', 'Enter a valid 10-digit number'); ok = false; } else clearAerr('err-su-ph-email');
-  if (pw.length < 6)   { setAerr('err-su-pw',       'Password must be 6+ characters'); ok = false; } else clearAerr('err-su-pw');
+  if (!name)                { setAerr('err-su-name',     'Name is required');               ok = false; } else clearAerr('err-su-name');
+  if (!isEmail(email))      { setAerr('err-su-email',    'Enter a valid email');             ok = false; } else clearAerr('err-su-email');
+  if (phone.length !== 10)  { setAerr('err-su-ph-email', 'Enter a valid 10-digit number');  ok = false; } else clearAerr('err-su-ph-email');
+  if (pw.length < 6)        { setAerr('err-su-pw',       'Password must be 6+ characters'); ok = false; } else clearAerr('err-su-pw');
   if (!ok) return;
 
   const users = getUsers();
-  if (!users.find(u => u.email === email)) users.push({ name, email, pw, phone });
+  if (users.find(u => u.email === email)) {
+    setAerr('err-su-email', 'An account with this email already exists');
+    return;
+  }
+
+  // FIX: Only one save block — removed the duplicate orphaned code that was outside this function
+  users.push({ name, email, pw, phone });
   localStorage.setItem('tb_users', JSON.stringify(users));
 
   setCurrentUser({ name, email, phone, method: 'email' });
@@ -323,18 +328,7 @@ function handleEmailSignup(e) {
   showAuthToast(`Account created! Welcome, ${name}! 🎉`, 'success');
 }
 
-  // Save user
-  const users = getUsers();
-  if (!users.find(u => u.email === email)) users.push({ name, email, pw });
-  localStorage.setItem('tb_users', JSON.stringify(users));
-
-  setCurrentUser({ name, email, method: 'email' });
-  closeAuthModal();
-  renderNavAuth();
-  showAuthToast(`Account created! Welcome, ${name}! 🎉`, 'success');
-
-
-/* Phone — Send OTP */
+/* ── Phone — Send OTP ── */
 function handlePhoneSend(e) {
   e.preventDefault();
   const isSignup   = e.target.id === 'signup-phone-form';
@@ -354,7 +348,6 @@ function handlePhoneSend(e) {
   } else clearAerr(phoneErrId);
   if (!ok) return;
 
-  // Generate and "send" OTP
   const otp = generateOTP();
   pendingOTP = otp;
   pendingUserData = {
@@ -363,12 +356,31 @@ function handlePhoneSend(e) {
     method: 'phone'
   };
 
-  console.info('%c[TraceBack OTP] ' + otp, 'color:#0ea5e9;font-size:1.3rem;font-weight:bold');
-  showAuthToast(`Demo OTP: ${otp} (also in console)`, 'info', 8000);
+  // FIX: Use a real email field for signup, fall back to console for phone-only login
+  const toEmail = isSignup
+    ? (document.getElementById('su-ph-email-addr')?.value.trim() || null)
+    : null;
 
-  const stepId  = isSignup ? 'otp-signup-step' : 'otp-login-step';
-  const msgId   = isSignup ? 'otp-signup-msg'  : 'otp-login-msg';
-  const formId  = isSignup ? 'signup-phone-form' : 'login-phone-form';
+  if (toEmail) {
+    emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+      to_email: toEmail,
+      to_name:  pendingUserData.name,
+      otp_code: otp
+    }).then(() => {
+      showAuthToast('OTP sent to your email inbox!', 'success');
+    }).catch(() => {
+      showAuthToast(`Email failed — OTP: ${otp} (check console)`, 'warning');
+      console.info('%c[OTP] ' + otp, 'color:#0ea5e9;font-size:1.2rem;font-weight:bold');
+    });
+  } else {
+    // Phone-only flow: show OTP in toast/console for demo
+    showAuthToast(`Demo OTP: ${otp}`, 'info', 8000);
+    console.info('%c[TraceBack OTP] ' + otp, 'color:#0ea5e9;font-size:1.2rem;font-weight:bold');
+  }
+
+  const stepId = isSignup ? 'otp-signup-step' : 'otp-login-step';
+  const msgId  = isSignup ? 'otp-signup-msg'  : 'otp-login-msg';
+  const formId = isSignup ? 'signup-phone-form' : 'login-phone-form';
 
   document.getElementById(formId).style.display = 'none';
   document.getElementById(stepId).style.display  = 'block';
@@ -377,7 +389,7 @@ function handlePhoneSend(e) {
   clearOTPBoxes(isSignup ? 'otp-signup-boxes' : 'otp-login-boxes');
 }
 
-/* OTP Verify */
+/* ── OTP Verify ── */
 function handleOTPVerify(mode) {
   const isSignup = mode === 'signup';
   const boxesId  = isSignup ? 'otp-signup-boxes' : 'otp-login-boxes';
@@ -385,7 +397,6 @@ function handleOTPVerify(mode) {
 
   if (entered.length < 6) { showAuthToast('Enter all 6 digits', 'error'); return; }
   if (entered !== pendingOTP) {
-    // Shake animation
     document.getElementById(boxesId)?.classList.add('shake');
     setTimeout(() => document.getElementById(boxesId)?.classList.remove('shake'), 500);
     showAuthToast('Incorrect OTP. Try again.', 'error');
@@ -421,10 +432,10 @@ function resetOTPSteps() {
 /* ══════════════════════════════
    USER STORAGE HELPERS
 ══════════════════════════════ */
-function getUsers()       { try { return JSON.parse(localStorage.getItem('tb_users')) || []; } catch { return []; } }
-function getCurrentUser() { try { return JSON.parse(localStorage.getItem('tb_current_user')); } catch { return null; } }
-function setCurrentUser(u){ localStorage.setItem('tb_current_user', JSON.stringify(u)); }
-function logout()         {
+function getUsers()        { try { return JSON.parse(localStorage.getItem('tb_users')) || []; } catch { return []; } }
+function getCurrentUser()  { try { return JSON.parse(localStorage.getItem('tb_current_user')); } catch { return null; } }
+function setCurrentUser(u) { localStorage.setItem('tb_current_user', JSON.stringify(u)); }
+function logout() {
   localStorage.removeItem('tb_current_user');
   renderNavAuth();
   showAuthToast('Logged out successfully', 'info');
@@ -446,13 +457,12 @@ document.head.appendChild(shakeStyle);
 /* ══════════════════════════════
    UTILITIES
 ══════════════════════════════ */
-function generateOTP() { return String(Math.floor(100000 + Math.random() * 900000)); }
-function isEmail(e)    { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
-function setAerr(id, msg) { const el = document.getElementById(id); if (el) el.textContent = msg; }
-function clearAerr(id)    { const el = document.getElementById(id); if (el) el.textContent = ''; }
+function generateOTP()        { return String(Math.floor(100000 + Math.random() * 900000)); }
+function isEmail(e)           { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function setAerr(id, msg)     { const el = document.getElementById(id); if (el) el.textContent = msg; }
+function clearAerr(id)        { const el = document.getElementById(id); if (el) el.textContent = ''; }
 
 function showAuthToast(msg, type = 'info', dur = 3500) {
-  // Reuse existing toast system if available, else create simple one
   if (typeof showToast === 'function') { showToast(msg, type, dur); return; }
   const icons = { success:'✅', error:'❌', info:'ℹ️', warning:'⚠️' };
   const tc = document.getElementById('toast-container');
