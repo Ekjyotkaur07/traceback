@@ -190,7 +190,11 @@ function showSection(sectionId, linkElement = null) {
   if (sectionId === 'browse') renderBrowseFeed();
   if (sectionId === 'leaderboard') renderLeaderboard();
   if (sectionId === 'dashboard') renderDashboardFeed();
-
+  if (sectionId === 'contribute') renderContributePage();
+  // Show location banner for relevant sections
+if (['browse', 'report-lost', 'report-found'].includes(sectionId)) {
+  triggerLocationBanner();
+}
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -1450,3 +1454,296 @@ window.showSection = function(id) {
   _origShowSection(id);
   if (id === 'contribute') renderContributePage();
 };
+// ===== TRACEBOT CHATBOT =====
+const TRACEBOT_KB = [
+  {
+    keys: ['what is traceback', 'about traceback', 'what does traceback do'],
+    answer: '🔍 <b>TraceBack</b> is a smart Lost & Found web app. You can report lost or found items, browse the registry, claim items, and track reunions — all in one place.'
+  },
+  {
+    keys: ['report lost', 'lost item', 'i lost'],
+    answer: '📋 To report a lost item:<br>1. Click <b>Report Lost</b> in the nav.<br>2. Fill in the item details, location, and upload a photo.<br>3. Submit — it gets added to the registry immediately!'
+  },
+  {
+    keys: ['report found', 'found item', 'i found'],
+    answer: '🔍 To report a found item:<br>1. Click <b>Report Found</b> in the nav.<br>2. Describe the item and where you found it.<br>3. Submit — someone looking for it will be notified.'
+  },
+  {
+    keys: ['claim', 'how do i claim', 'get my item back'],
+    answer: '🙋 To claim an item:<br>1. Go to <b>Browse</b> and find your item.<br>2. Click on it to open the detail view.<br>3. Hit <b>Claim Item</b> and fill in the claim form.<br>4. The finder will be notified to verify.'
+  },
+  {
+    keys: ['leaderboard', 'points', 'score', 'ranking'],
+    answer: '🏆 The <b>Leaderboard</b> ranks users by their contribution points. You earn points by reporting found items and successfully reuniting them with owners. Go to <b>Leaderboard</b> in the nav to see the rankings!'
+  },
+  {
+    keys: ['contribute', 'open source', 'github', 'help develop'],
+    answer: '🤝 TraceBack is open source! Click the <b>Contribute</b> button in the nav to see how to fork the repo, pick an issue, and submit a pull request. All contributions are welcome!'
+  },
+  {
+    keys: ['login', 'sign up', 'register', 'account', 'signup'],
+    answer: '🔐 Click <b>Login / Sign Up</b> in the top right. You can sign up with your email or use phone OTP. An account lets you report items, claim, and track your activity on the dashboard.'
+  },
+  {
+    keys: ['dashboard', 'my items', 'my reports'],
+    answer: '📊 The <b>Dashboard</b> shows all your reported items, their status (Lost / Found / Resolved), and your recent activity. You can also delete or update your reports from there.'
+  },
+  {
+    keys: ['contact', 'support', 'help', 'email us'],
+    answer: '📞 Go to <b>Contact Us</b> in the nav to send us a message. Fill in your name, email, and your query — our team will get back to you as soon as possible.'
+  },
+  {
+    keys: ['data', 'privacy', 'safe', 'security', 'information'],
+    answer: '🔒 Your data is stored securely in your browser\'s local storage. We do not share or sell your personal information. Photos are only used to help identify lost items.'
+  },
+  {
+    keys: ['dark mode', 'theme', 'light mode', 'night mode'],
+    answer: '🌙 Click the <b>moon / sun icon</b> in the top right navbar to toggle between light and dark mode. Your preference is saved automatically!'
+  },
+  {
+    keys: ['browse', 'search', 'find item', 'filter'],
+    answer: '🔎 Go to <b>Browse</b> in the nav. You can search by keyword, filter by category (electronics, bags, keys...) and status (Lost / Found / Resolved).'
+  },
+  {
+    keys: ['hello', 'hi', 'hey', 'hii', 'good morning', 'good evening'],
+    answer: '👋 Hey there! I\'m <b>TraceBot</b>. Ask me anything about TraceBack — reporting items, claiming, leaderboard, contributing, and more!'
+  },
+  {
+    keys: ['thank', 'thanks', 'ty', 'helpful'],
+    answer: '😊 You\'re welcome! Let me know if you have any other questions. I\'m always here to help!'
+  },
+  {
+    keys: ['bye', 'goodbye', 'see you', 'close'],
+    answer: '👋 Goodbye! Come back anytime you need help. Hope TraceBack helps you find what you\'re looking for! 💙'
+  }
+];
+
+function toggleChatbot() {
+  const win = document.getElementById('chatbot-window');
+  const dot = document.querySelector('.chat-notif-dot');
+  win.classList.toggle('chatbot-hidden');
+  if (dot) dot.style.display = 'none';
+}
+
+function askQuestion(q) {
+  document.getElementById('quickBtns')?.remove();
+  appendChatMsg(q, 'user');
+  showTypingThenReply(q);
+}
+
+function sendChatMessage() {
+  const input = document.getElementById('chatbotInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  document.getElementById('quickBtns')?.remove();
+  appendChatMsg(text, 'user');
+  showTypingThenReply(text);
+}
+
+function appendChatMsg(text, role) {
+  const container = document.getElementById('chatbotMessages');
+  const div = document.createElement('div');
+  div.className = `chat-msg ${role}`;
+  div.innerHTML = `<span>${text}</span>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function showTypingThenReply(query) {
+  const container = document.getElementById('chatbotMessages');
+
+  const typing = document.createElement('div');
+  typing.className = 'chat-typing';
+  typing.innerHTML = '<span></span><span></span><span></span>';
+  container.appendChild(typing);
+  container.scrollTop = container.scrollHeight;
+
+  setTimeout(() => {
+    typing.remove();
+    const reply = getBotReply(query);
+    const div = document.createElement('div');
+    div.className = 'chat-msg bot';
+    div.innerHTML = `<span>${reply}</span>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }, 900);
+}
+
+function getBotReply(query) {
+  const q = query.toLowerCase();
+  for (const entry of TRACEBOT_KB) {
+    if (entry.keys.some(k => q.includes(k))) {
+      return entry.answer;
+    }
+  }
+  return `🤔 I'm not sure about that one. Try asking about:<br>
+    <b>reporting items, claiming, leaderboard, login, dashboard, contributing,</b> or <b>contact support</b>. 
+    You can also go to <b>Contact Us</b> for direct help!`;
+}
+// ===== LOCATION ACCESS =====
+let userCity = null;
+let userCoords = null;
+
+function triggerLocationBanner() {
+  const decided = localStorage.getItem('tb_location_decided');
+  if (decided === 'granted') {
+    const saved = localStorage.getItem('tb_user_city');
+    if (saved) applyLocationToSearch(saved);
+    return;
+  }
+  if (decided === 'denied') return;
+
+  // Show banner after short delay so section transition finishes
+  setTimeout(() => {
+    const banner = document.getElementById('locationBanner');
+    if (banner) banner.classList.remove('hidden');
+  }, 600);
+}
+
+function dismissLocationBanner(silent = false) {
+  const banner = document.getElementById('locationBanner');
+  if (banner) banner.classList.add('hidden');
+  if (!silent) {
+    localStorage.setItem('tb_location_decided', 'denied');
+  }
+}
+
+function requestLocation() {
+  dismissLocationBanner(true);
+  localStorage.setItem('tb_location_decided', 'granted');
+
+  if (!navigator.geolocation) {
+    triggerToast('Geolocation is not supported by your browser.', 'error');
+    return;
+  }
+
+  triggerToast('Detecting your location...', 'info');
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      const city = await reverseGeocode(userCoords.lat, userCoords.lng);
+      if (city) {
+        userCity = city;
+        localStorage.setItem('tb_user_city', city);
+        applyLocationToSearch(city);
+        triggerToast(`📍 Location set to ${city}`, 'success');
+      }
+    },
+    (err) => {
+      triggerToast('Could not get your location. Please allow access in browser settings.', 'error');
+    }
+  );
+}
+
+async function reverseGeocode(lat, lng) {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+      { headers: { 'Accept-Language': 'en' } }
+    );
+    const data = await res.json();
+    return (
+      data.address?.city ||
+      data.address?.town ||
+      data.address?.village ||
+      data.address?.county ||
+      null
+    );
+  } catch {
+    return null;
+  }
+}
+
+function applyLocationToSearch(city) {
+  // Show pill
+  const pill = document.getElementById('locationPill');
+  const pillText = document.getElementById('locationPillText');
+  if (pill && pillText) {
+    pillText.textContent = city;
+    pill.style.display = 'inline-flex';
+  }
+
+  // Update search placeholder
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) {
+    searchInput.placeholder = `Search items near ${city}...`;
+  }
+
+  userCity = city;
+
+  // Re-render browse if it's active
+  const browseSection = document.getElementById('browse');
+  if (browseSection && browseSection.classList.contains('active')) {
+    filterAndRenderItems();
+  }
+}
+
+function clearLocation() {
+  userCity = null;
+  userCoords = null;
+  localStorage.removeItem('tb_user_city');
+  localStorage.removeItem('tb_location_decided');
+
+  const pill = document.getElementById('locationPill');
+  if (pill) pill.style.display = 'none';
+
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) searchInput.placeholder = 'Search items...';
+
+  triggerToast('Location cleared.', 'info');
+}
+
+// Hook into your existing filter function to sort by city match
+const _origFilter = window.filterAndRenderItems;
+if (typeof filterAndRenderItems === 'function') {
+  window.filterAndRenderItems = function () {
+    _origFilter && _origFilter();
+    if (!userCity) return;
+    sortCardsByCity(userCity);
+  };
+}
+
+function sortCardsByCity(city) {
+  const grid = document.querySelector('.items-grid');
+  if (!grid) return;
+  const cards = Array.from(grid.children);
+  cards.sort((a, b) => {
+    const aMatch = a.textContent.toLowerCase().includes(city.toLowerCase()) ? 0 : 1;
+    const bMatch = b.textContent.toLowerCase().includes(city.toLowerCase()) ? 0 : 1;
+    return aMatch - bMatch;
+  });
+  cards.forEach(c => grid.appendChild(c));
+}
+function fillLocationField(fieldId) {
+  const field = document.getElementById(fieldId);
+  if (!field) return;
+
+  if (userCity) {
+    field.value = userCity;
+    triggerToast(`📍 Location set to ${userCity}`, 'success');
+    return;
+  }
+
+  if (!navigator.geolocation) {
+    triggerToast('Geolocation not supported by your browser.', 'error');
+    return;
+  }
+
+  triggerToast('Detecting your location...', 'info');
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      const city = await reverseGeocode(pos.coords.latitude, pos.coords.longitude);
+      if (city) {
+        userCity = city;
+        localStorage.setItem('tb_user_city', city);
+        localStorage.setItem('tb_location_decided', 'granted');
+        field.value = city;
+        applyLocationToSearch(city);
+        triggerToast(`📍 Location set to ${city}`, 'success');
+      }
+    },
+    () => triggerToast('Could not get location. Please allow access.', 'error')
+  );
+}
