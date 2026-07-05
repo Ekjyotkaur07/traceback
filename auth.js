@@ -52,6 +52,8 @@ function renderNavAuth() {
           <span style="font-size:.75rem;color:#94a3b8">▾</span>
         </div>
         <div class="nav-dropdown">
+          <button class="nav-dd-item" onclick="showSection('profile')">👤 My Profile</button>
+          <button class="nav-dd-item" onclick="showSection('dashboard')">📊 Dashboard</button>
           <button class="nav-dd-item logout" id="logout-btn">🚪 Logout</button>
         </div>
       </div>`;
