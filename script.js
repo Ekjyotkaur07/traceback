@@ -191,6 +191,7 @@ function showSection(sectionId, linkElement = null) {
   if (sectionId === 'leaderboard') renderLeaderboard();
   if (sectionId === 'dashboard') renderDashboardFeed();
   if (sectionId === 'contribute') renderContributePage();
+  if (sectionId === 'profile') renderProfilePage();
   // Show location banner for relevant sections
 if (['browse', 'report-lost', 'report-found'].includes(sectionId)) {
   triggerLocationBanner();
@@ -1746,4 +1747,207 @@ function fillLocationField(fieldId) {
     },
     () => triggerToast('Could not get location. Please allow access.', 'error')
   );
+}
+// ==========================================================================
+// PROFILE PAGE
+// ==========================================================================
+function renderProfilePage() {
+  const user = getCurrentUser();
+  if (!user) return;
+
+  // Avatar initial
+  const avatarBig = document.getElementById('profileAvatarBig');
+  if (avatarBig) avatarBig.textContent = (user.name || user.email || 'U')[0].toUpperCase();
+
+  // Name & email
+  const nameEl  = document.getElementById('profileDisplayName');
+  const emailEl = document.getElementById('profileDisplayEmail');
+  if (nameEl)  nameEl.textContent  = user.name  || 'User';
+  if (emailEl) emailEl.textContent = user.email || '—';
+
+  // Pre-fill edit fields
+  const editName  = document.getElementById('editName');
+  const editEmail = document.getElementById('editEmail');
+  if (editName)  editName.value  = user.name  || '';
+  if (editEmail) editEmail.value = user.email || '';
+
+  // Stats
+  renderProfileStats(user);
+
+  // Items
+  renderProfileItems('all');
+}
+
+function renderProfileStats(user) {
+  const allItems = getAllItems();
+  const myItems  = allItems.filter(i =>
+    i.email === user.email || i.reporter === 'You (Local Author)'
+  );
+
+  const points = myItems.reduce((sum, i) => {
+    const s = (i.status || '').toLowerCase();
+    const t = (i.type   || '').toLowerCase();
+    if (s === 'resolved') return sum + 15;
+    if (t === 'found')    return sum + 10;
+    return sum + 5;
+  }, 0);
+
+  const pointsEl = document.getElementById('profilePoints');
+  if (pointsEl) pointsEl.textContent = points;
+
+  // Rank
+  const allUsers = JSON.parse(localStorage.getItem('tb_users') || '[]');
+  const scored = allUsers.map(u => {
+    const uItems = allItems.filter(i => i.email === u.email);
+    const uPts   = uItems.reduce((s, i) => {
+      const st = (i.status || '').toLowerCase();
+      const tp = (i.type   || '').toLowerCase();
+      if (st === 'resolved') return s + 15;
+      if (tp === 'found')    return s + 10;
+      return s + 5;
+    }, 0);
+    return { email: u.email, pts: uPts };
+  }).sort((a, b) => b.pts - a.pts);
+
+  const rank    = scored.findIndex(u => u.email === user.email) + 1;
+  const rankEl  = document.getElementById('profileRank');
+  if (rankEl) rankEl.textContent = rank > 0 ? rank : '—';
+}
+
+function renderProfileItems(tab) {
+  const user = getCurrentUser();
+  const grid = document.getElementById('profileItemsGrid');
+  if (!grid || !user) return;
+
+  let items = getAllItems().filter(i =>
+    i.email === user.email || i.reporter === 'You (Local Author)'
+  );
+
+  if (tab === 'lost')     items = items.filter(i => (i.type   || '').toLowerCase() === 'lost');
+  if (tab === 'found')    items = items.filter(i => (i.type   || '').toLowerCase() === 'found');
+  if (tab === 'resolved') items = items.filter(i => (i.status || '').toLowerCase() === 'resolved');
+
+  if (items.length === 0) {
+    grid.innerHTML = '<p class="profile-empty">No items in this category yet.</p>';
+    return;
+  }
+
+  grid.innerHTML = items.map(item => {
+    const status     = (item.status || item.type || 'lost').toLowerCase();
+    const badgeClass = status === 'found' ? 'found' : status === 'resolved' ? 'resolved' : 'lost';
+    const label      = badgeClass.charAt(0).toUpperCase() + badgeClass.slice(1);
+    const imgHtml    = item.photo
+      ? `<img src="${item.photo}" alt="${item.name || ''}" class="profile-item-img" />`
+      : `<div class="profile-item-img-placeholder">${getItemEmoji(item.category)}</div>`;
+
+    return `
+      <div class="profile-item-card">
+        ${imgHtml}
+        <div class="profile-item-info">
+          <b>${item.title || item.name || 'Unknown Item'}</b>
+          <span>${item.location || '—'}</span>
+          <span class="badge ${badgeClass}">${label}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function switchProfileTab(tab, el) {
+  document.querySelectorAll('.pitab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderProfileItems(tab);
+}
+
+function saveProfileInfo() {
+  const name  = document.getElementById('editName')?.value.trim();
+  const email = document.getElementById('editEmail')?.value.trim();
+
+  if (!name || !email) {
+    triggerToast('Name and email cannot be empty.', 'error');
+    return;
+  }
+
+  const user    = getCurrentUser();
+  const users   = JSON.parse(localStorage.getItem('tb_users') || '[]');
+  const idx     = users.findIndex(u => u.email === user.email);
+  const updated = { ...user, name, email };
+
+  if (idx > -1) users[idx] = { ...users[idx], name, email };
+  localStorage.setItem('tb_users', JSON.stringify(users));
+  localStorage.setItem('tb_current_user', JSON.stringify(updated));
+
+  renderProfilePage();
+  if (typeof renderNavAuth === 'function') renderNavAuth();
+  triggerToast('Profile updated successfully! ✅', 'success');
+}
+
+function saveNewPassword() {
+  const current  = document.getElementById('currentPw')?.value;
+  const newPw    = document.getElementById('newPw')?.value;
+  const confirm  = document.getElementById('confirmPw')?.value;
+
+  if (!current || !newPw || !confirm) {
+    triggerToast('Please fill all password fields.', 'error');
+    return;
+  }
+  if (newPw !== confirm) {
+    triggerToast('New passwords do not match.', 'error');
+    return;
+  }
+  if (newPw.length < 6) {
+    triggerToast('Password must be at least 6 characters.', 'error');
+    return;
+  }
+
+  const user  = getCurrentUser();
+  const users = JSON.parse(localStorage.getItem('tb_users') || '[]');
+  const idx   = users.findIndex(u => u.email === user.email);
+
+  if (idx > -1 && users[idx].pw !== current) {
+    triggerToast('Current password is incorrect.', 'error');
+    return;
+  }
+
+  if (idx > -1) users[idx].pw = newPw;
+  localStorage.setItem('tb_users', JSON.stringify(users));
+
+  document.getElementById('currentPw').value = '';
+  document.getElementById('newPw').value     = '';
+  document.getElementById('confirmPw').value = '';
+
+  triggerToast('Password updated successfully! 🔒', 'success');
+}
+
+function confirmDeleteAccount() {
+  const confirmed = confirm('Are you sure? This will permanently delete your account and all your reported items.');
+  if (!confirmed) return;
+
+  const user    = getCurrentUser();
+  const users   = JSON.parse(localStorage.getItem('tb_users') || '[]');
+  const filtered = users.filter(u => u.email !== user.email);
+  localStorage.setItem('tb_users', JSON.stringify(filtered));
+  localStorage.removeItem('tb_current_user');
+
+  // Remove user's local items
+  const items = getLocalItems().filter(i => i.email !== user.email);
+  saveLocalItems(items);
+
+  if (typeof renderNavAuth === 'function') renderNavAuth();
+  triggerToast('Account deleted. Goodbye! 👋', 'info');
+  showSection('home');
+}
+function togglePasswordForm() {
+  const form = document.getElementById('pwChangeForm');
+  const btn  = document.getElementById('togglePwBtn');
+  const isHidden = form.classList.contains('pw-form-hidden');
+
+  form.classList.toggle('pw-form-hidden', !isHidden);
+  btn.textContent = isHidden ? 'Cancel' : 'Change';
+
+  // Clear fields on close
+  if (!isHidden) {
+    document.getElementById('currentPw').value = '';
+    document.getElementById('newPw').value     = '';
+    document.getElementById('confirmPw').value = '';
+  }
 }
