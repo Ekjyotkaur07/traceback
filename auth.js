@@ -6,18 +6,18 @@
    Users stored in localStorage: tb_users
    Logged-in user: tb_current_user
 ══════════════════════════════════════════ */
-const EMAILJS_KEY      = 'lMVTSQcW_5ej4Gk7Q';
-const EMAILJS_SERVICE  = 'service_7cyyqhq';
+const EMAILJS_KEY = 'lMVTSQcW_5ej4Gk7Q';
+const EMAILJS_SERVICE = 'service_7cyyqhq';
 const EMAILJS_TEMPLATE = 'template_htxwoin';
 
 if (typeof emailjs !== 'undefined') {
   emailjs.init('YOUR_PUBLIC_KEY');
 }
 /* ── State ── */
-let pendingOTP      = null;
+let pendingOTP = null;
 let pendingUserData = null;
-let activeTab       = 'login';   // 'login' | 'signup'
-let activeMethod    = 'email';   // 'email' | 'phone'
+let activeTab = 'login';   // 'login' | 'signup'
+let activeMethod = 'email';   // 'email' | 'phone'
 
 /* ══════════════════════════════
    BOOT
@@ -99,14 +99,14 @@ function wireAuthModal() {
    Blocks browsing/reporting unless logged in
 ══════════════════════════════ */
 function initAccessControl() {
-const protectedSections = ['browse', 'report-lost', 'report-found', 'leaderboard', 'dashboard', 'contact'];
+  const protectedSections = ['browse', 'report-lost', 'report-found', 'leaderboard', 'dashboard', 'contact'];
   document.addEventListener('click', e => {
     const link = e.target.closest('a[href], button[onclick]');
     if (!link) return;
 
-    const href    = link.getAttribute('href') || '';
+    const href = link.getAttribute('href') || '';
     const onclick = link.getAttribute('onclick') || '';
-    const sectionMatch = href.replace('#','') || onclick.match(/showSection\(['"](\w[\w-]*)['"]/)?.[ 1];
+    const sectionMatch = href.replace('#', '') || onclick.match(/showSection\(['"](\w[\w-]*)['"]/)?.[1];
 
     if (!sectionMatch) return;
     if (!protectedSections.includes(sectionMatch)) return;
@@ -128,7 +128,7 @@ function wireTabsAndMethods() {
     tab.addEventListener('click', () => {
       activeTab = tab.dataset.tab;
       document.querySelectorAll('.atab').forEach(t => t.classList.toggle('active', t.dataset.tab === activeTab));
-      document.getElementById('panel-login')?.classList.toggle('active',  activeTab === 'login');
+      document.getElementById('panel-login')?.classList.toggle('active', activeTab === 'login');
       document.getElementById('panel-signup')?.classList.toggle('active', activeTab === 'signup');
       resetOTPSteps();
       setMethod('email');
@@ -145,12 +145,12 @@ function setMethod(method) {
   document.querySelectorAll('.meth').forEach(b => b.classList.toggle('active', b.dataset.method === method));
 
   const isLogin = activeTab === 'login';
-  const panel   = isLogin ? 'panel-login' : 'panel-signup';
+  const panel = isLogin ? 'panel-login' : 'panel-signup';
 
   document.querySelectorAll(`#${panel} .aform`).forEach(f => f.classList.remove('active'));
   const formId = method === 'email'
-    ? (isLogin ? 'login-email-form'  : 'signup-email-form')
-    : (isLogin ? 'login-phone-form'  : 'signup-phone-form');
+    ? (isLogin ? 'login-email-form' : 'signup-email-form')
+    : (isLogin ? 'login-phone-form' : 'signup-phone-form');
   document.getElementById(formId)?.classList.add('active');
   resetOTPSteps();
 }
@@ -159,32 +159,32 @@ function setMethod(method) {
    PASSWORD STRENGTH CHECKER
 ══════════════════════════════ */
 function wirePasswordStrength() {
-  const inp   = document.getElementById('su-pw');
-  const fill  = document.getElementById('pw-fill');
+  const inp = document.getElementById('su-pw');
+  const fill = document.getElementById('pw-fill');
   const label = document.getElementById('pw-label');
   if (!inp || !fill || !label) return;
 
   inp.addEventListener('input', () => {
-    const pw  = inp.value;
+    const pw = inp.value;
     let score = 0;
-    if (pw.length >= 6)            score++;
-    if (pw.length >= 10)           score++;
-    if (/[A-Z]/.test(pw))         score++;
-    if (/[0-9]/.test(pw))         score++;
-    if (/[^A-Za-z0-9]/.test(pw))  score++;
+    if (pw.length >= 6) score++;
+    if (pw.length >= 10) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
 
     const levels = [
       { pct: '20%', color: '#ef4444', text: 'Very Weak' },
-      { pct: '40%', color: '#f97316', text: 'Weak'      },
-      { pct: '60%', color: '#eab308', text: 'Fair'      },
-      { pct: '80%', color: '#22c55e', text: 'Strong'    },
-      { pct: '100%',color: '#06b6d4', text: 'Excellent' },
+      { pct: '40%', color: '#f97316', text: 'Weak' },
+      { pct: '60%', color: '#eab308', text: 'Fair' },
+      { pct: '80%', color: '#22c55e', text: 'Strong' },
+      { pct: '100%', color: '#06b6d4', text: 'Excellent' },
     ];
-    const lvl   = pw ? (levels[score - 1] || levels[0]) : null;
-    fill.style.width      = lvl ? lvl.pct   : '0';
+    const lvl = pw ? (levels[score - 1] || levels[0]) : null;
+    fill.style.width = lvl ? lvl.pct : '0';
     fill.style.background = lvl ? lvl.color : '';
-    label.textContent     = lvl ? lvl.text  : '—';
-    label.style.color     = lvl ? lvl.color : '#94a3b8';
+    label.textContent = lvl ? lvl.text : '—';
+    label.style.color = lvl ? lvl.color : '#94a3b8';
   });
 }
 
@@ -196,7 +196,7 @@ function wirePasswordToggles() {
     btn.addEventListener('click', () => {
       const inp = document.getElementById(btn.dataset.target);
       if (!inp) return;
-      inp.type        = inp.type === 'password' ? 'text' : 'password';
+      inp.type = inp.type === 'password' ? 'text' : 'password';
       btn.textContent = inp.type === 'password' ? '👁' : '🙈';
     });
   });
@@ -220,7 +220,7 @@ function wireOTPBoxes() {
       });
       box.addEventListener('paste', e => {
         e.preventDefault();
-        const pasted = e.clipboardData.getData('text').replace(/\D/g,'').slice(0, 6);
+        const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
         pasted.split('').forEach((ch, j) => {
           if (boxes[j]) { boxes[j].value = ch; boxes[j].classList.add('done'); }
         });
@@ -266,24 +266,24 @@ function startCountdown(btn, sec) {
    FORM HANDLERS
 ══════════════════════════════ */
 function wireForms() {
-  document.getElementById('login-email-form')?.addEventListener('submit',  handleEmailLogin);
+  document.getElementById('login-email-form')?.addEventListener('submit', handleEmailLogin);
   document.getElementById('signup-email-form')?.addEventListener('submit', handleEmailSignup);
-  document.getElementById('login-phone-form')?.addEventListener('submit',  handlePhoneSend);
+  document.getElementById('login-phone-form')?.addEventListener('submit', handlePhoneSend);
   document.getElementById('signup-phone-form')?.addEventListener('submit', handlePhoneSend);
-  document.getElementById('verify-login-otp')?.addEventListener('click',   () => handleOTPVerify('login'));
-  document.getElementById('verify-signup-otp')?.addEventListener('click',  () => handleOTPVerify('signup'));
+  document.getElementById('verify-login-otp')?.addEventListener('click', () => handleOTPVerify('login'));
+  document.getElementById('verify-signup-otp')?.addEventListener('click', () => handleOTPVerify('signup'));
 }
 
 /* ── Email Login ── */
 function handleEmailLogin(e) {
   e.preventDefault();
   const email = document.getElementById('li-email').value.trim();
-  const pw    = document.getElementById('li-pw').value;
+  const pw = document.getElementById('li-pw').value;
   let ok = true;
 
   if (!isEmail(email)) { setAerr('err-li-email', 'Enter a valid email'); ok = false; }
   else clearAerr('err-li-email');
-  if (pw.length < 6)   { setAerr('err-li-pw', 'Password must be 6+ characters'); ok = false; }
+  if (pw.length < 6) { setAerr('err-li-pw', 'Password must be 6+ characters'); ok = false; }
   else clearAerr('err-li-pw');
   if (!ok) return;
 
@@ -304,16 +304,16 @@ function handleEmailLogin(e) {
 /* ── Email Signup ── */
 function handleEmailSignup(e) {
   e.preventDefault();
-  const name  = document.getElementById('su-name').value.trim();
+  const name = document.getElementById('su-name').value.trim();
   const email = document.getElementById('su-email').value.trim();
-  const pw    = document.getElementById('su-pw').value;
+  const pw = document.getElementById('su-pw').value;
   const phone = document.getElementById('su-ph-email').value.replace(/\D/g, '');
   let ok = true;
 
-  if (!name)                { setAerr('err-su-name',     'Name is required');               ok = false; } else clearAerr('err-su-name');
-  if (!isEmail(email))      { setAerr('err-su-email',    'Enter a valid email');             ok = false; } else clearAerr('err-su-email');
-  if (phone.length !== 10)  { setAerr('err-su-ph-email', 'Enter a valid 10-digit number');  ok = false; } else clearAerr('err-su-ph-email');
-  if (pw.length < 6)        { setAerr('err-su-pw',       'Password must be 6+ characters'); ok = false; } else clearAerr('err-su-pw');
+  if (!name) { setAerr('err-su-name', 'Name is required'); ok = false; } else clearAerr('err-su-name');
+  if (!isEmail(email)) { setAerr('err-su-email', 'Enter a valid email'); ok = false; } else clearAerr('err-su-email');
+  if (phone.length !== 10) { setAerr('err-su-ph-email', 'Enter a valid 10-digit number'); ok = false; } else clearAerr('err-su-ph-email');
+  if (pw.length < 6) { setAerr('err-su-pw', 'Password must be 6+ characters'); ok = false; } else clearAerr('err-su-pw');
   if (!ok) return;
 
   const users = getUsers();
@@ -335,10 +335,10 @@ function handleEmailSignup(e) {
 /* ── Phone — Send OTP ── */
 function handlePhoneSend(e) {
   e.preventDefault();
-  const isSignup   = e.target.id === 'signup-phone-form';
-  const nameInp    = isSignup ? document.getElementById('su-ph-name') : null;
-  const phoneInp   = document.getElementById(isSignup ? 'su-phone' : 'li-phone');
-  const nameErrId  = 'err-su-ph-name';
+  const isSignup = e.target.id === 'signup-phone-form';
+  const nameInp = isSignup ? document.getElementById('su-ph-name') : null;
+  const phoneInp = document.getElementById(isSignup ? 'su-phone' : 'li-phone');
+  const nameErrId = 'err-su-ph-name';
   const phoneErrId = isSignup ? 'err-su-phone' : 'err-li-phone';
   let ok = true;
 
@@ -346,7 +346,7 @@ function handlePhoneSend(e) {
     setAerr(nameErrId, 'Name is required'); ok = false;
   } else clearAerr(nameErrId);
 
-  const phone = phoneInp?.value.replace(/\D/g,'');
+  const phone = phoneInp?.value.replace(/\D/g, '');
   if (!phone || phone.length !== 10) {
     setAerr(phoneErrId, 'Enter a valid 10-digit number'); ok = false;
   } else clearAerr(phoneErrId);
@@ -355,8 +355,8 @@ function handlePhoneSend(e) {
   const otp = generateOTP();
   pendingOTP = otp;
   pendingUserData = {
-    name:   isSignup ? nameInp.value.trim() : `User${phone.slice(-4)}`,
-    phone:  '+91' + phone,
+    name: isSignup ? nameInp.value.trim() : `User${phone.slice(-4)}`,
+    phone: '+91' + phone,
     method: 'phone'
   };
 
@@ -368,7 +368,7 @@ function handlePhoneSend(e) {
   if (toEmail) {
     emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
       to_email: toEmail,
-      to_name:  pendingUserData.name,
+      to_name: pendingUserData.name,
       otp_code: otp
     }).then(() => {
       showAuthToast('OTP sent to your email inbox!', 'success');
@@ -383,21 +383,21 @@ function handlePhoneSend(e) {
   }
 
   const stepId = isSignup ? 'otp-signup-step' : 'otp-login-step';
-  const msgId  = isSignup ? 'otp-signup-msg'  : 'otp-login-msg';
+  const msgId = isSignup ? 'otp-signup-msg' : 'otp-login-msg';
   const formId = isSignup ? 'signup-phone-form' : 'login-phone-form';
 
   document.getElementById(formId).style.display = 'none';
-  document.getElementById(stepId).style.display  = 'block';
+  document.getElementById(stepId).style.display = 'block';
   document.getElementById(msgId).textContent =
-    `OTP sent to +91 ${phone.slice(0,5)} ${phone.slice(5)}`;
+    `OTP sent to +91 ${phone.slice(0, 5)} ${phone.slice(5)}`;
   clearOTPBoxes(isSignup ? 'otp-signup-boxes' : 'otp-login-boxes');
 }
 
 /* ── OTP Verify ── */
 function handleOTPVerify(mode) {
   const isSignup = mode === 'signup';
-  const boxesId  = isSignup ? 'otp-signup-boxes' : 'otp-login-boxes';
-  const entered  = getOTP(boxesId);
+  const boxesId = isSignup ? 'otp-signup-boxes' : 'otp-login-boxes';
+  const entered = getOTP(boxesId);
 
   if (entered.length < 6) { showAuthToast('Enter all 6 digits', 'error'); return; }
   if (entered !== pendingOTP) {
@@ -408,7 +408,7 @@ function handleOTPVerify(mode) {
   }
 
   setCurrentUser(pendingUserData);
-  pendingOTP      = null;
+  pendingOTP = null;
   pendingUserData = null;
   closeAuthModal();
   renderNavAuth();
@@ -419,25 +419,25 @@ function handleOTPVerify(mode) {
    OTP STEP RESET
 ══════════════════════════════ */
 function resetOTPSteps() {
-  ['otp-login-step','otp-signup-step'].forEach(id => {
+  ['otp-login-step', 'otp-signup-step'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
-  ['login-phone-form','signup-phone-form'].forEach(id => {
+  ['login-phone-form', 'signup-phone-form'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = '';
   });
   clearOTPBoxes('otp-login-boxes');
   clearOTPBoxes('otp-signup-boxes');
-  pendingOTP      = null;
+  pendingOTP = null;
   pendingUserData = null;
 }
 
 /* ══════════════════════════════
    USER STORAGE HELPERS
 ══════════════════════════════ */
-function getUsers()        { try { return JSON.parse(localStorage.getItem('tb_users')) || []; } catch { return []; } }
-function getCurrentUser()  { try { return JSON.parse(localStorage.getItem('tb_current_user')); } catch { return null; } }
+function getUsers() { try { return JSON.parse(localStorage.getItem('tb_users')) || []; } catch { return []; } }
+function getCurrentUser() { try { return JSON.parse(localStorage.getItem('tb_current_user')); } catch { return null; } }
 function setCurrentUser(u) { localStorage.setItem('tb_current_user', JSON.stringify(u)); }
 function logout() {
   localStorage.removeItem('tb_current_user');
@@ -461,19 +461,19 @@ document.head.appendChild(shakeStyle);
 /* ══════════════════════════════
    UTILITIES
 ══════════════════════════════ */
-function generateOTP()        { return String(Math.floor(100000 + Math.random() * 900000)); }
-function isEmail(e)           { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
-function setAerr(id, msg)     { const el = document.getElementById(id); if (el) el.textContent = msg; }
-function clearAerr(id)        { const el = document.getElementById(id); if (el) el.textContent = ''; }
+function generateOTP() { return String(Math.floor(100000 + Math.random() * 900000)); }
+function isEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function setAerr(id, msg) { const el = document.getElementById(id); if (el) el.textContent = msg; }
+function clearAerr(id) { const el = document.getElementById(id); if (el) el.textContent = ''; }
 
 function showAuthToast(msg, type = 'info', dur = 3500) {
   if (typeof showToast === 'function') { showToast(msg, type, dur); return; }
-  const icons = { success:'✅', error:'❌', info:'ℹ️', warning:'⚠️' };
+  const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
   const tc = document.getElementById('toast-container');
   if (!tc) return;
   const t = document.createElement('div');
   t.className = `toast ${type}`;
-  t.innerHTML = `<span>${icons[type]||'ℹ️'}</span><span style="flex:1;font-size:.84rem">${msg}</span>`;
+  t.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span style="flex:1;font-size:.84rem">${msg}</span>`;
   tc.appendChild(t);
   setTimeout(() => t.remove(), dur);
 }
@@ -490,11 +490,11 @@ function handleGoogleSignIn() {
     .then((result) => {
       const user = result.user;
       const userData = {
-        name:   user.displayName || 'Google User',
-        email:  user.email,
-        photo:  user.photoURL || null,
+        name: user.displayName || 'Google User',
+        email: user.email,
+        photo: user.photoURL || null,
         method: 'google',
-        uid:    user.uid
+        uid: user.uid
       };
 
       // Save to localStorage to match existing system

@@ -3,7 +3,7 @@
 // ==========================================================================
 
 const DATABASE_KEY = 'traceback_items_v4';
-const JSONBIN_ID  = '6a115d9a6610dd3ae8907122';
+const JSONBIN_ID = '6a115d9a6610dd3ae8907122';
 const JSONBIN_KEY = '$2a$10$UyjgA1CZ0XZtRql8RhKS5.xJvUb645ZQVwE/FTrCXy2bpf9bvta7G';
 // Emojis mapping for categories
 const CATEGORY_EMOJIS = {
@@ -73,7 +73,7 @@ function getDynamicLeaderboard() {
 
   allItems.forEach(item => {
     const reporter = item.reporter || "Anonymous";
-    
+
     // Ignore default user placeholder if they haven't resolved anything yet, or keep them
     if (!contributors[reporter]) {
       contributors[reporter] = {
@@ -123,7 +123,7 @@ function triggerToast(message, type = 'info') {
 
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
-  
+
   let emoji = '🔔';
   if (type === 'success') emoji = '✅';
   if (type === 'error') emoji = '❌';
@@ -145,15 +145,15 @@ function triggerToast(message, type = 'info') {
 function showSection(sectionId, linkElement = null) {
   const activePage = document.querySelector('.page.active');
   if (activePage) {
-    if (activePage.id === sectionId) return; 
+    if (activePage.id === sectionId) return;
 
     activePage.style.opacity = '0';
     activePage.style.transform = 'translateY(15px)';
-    
+
     setTimeout(() => {
       activePage.classList.remove('active');
       activePage.style.display = 'none';
-      
+
       const targetPage = document.getElementById(sectionId);
       if (targetPage) {
         targetPage.style.display = 'block';
@@ -174,7 +174,7 @@ function showSection(sectionId, linkElement = null) {
   }
 
   document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
-  
+
   if (linkElement) {
     linkElement.classList.add('active');
   } else {
@@ -193,15 +193,15 @@ function showSection(sectionId, linkElement = null) {
   if (sectionId === 'contribute') renderContributePage();
   if (sectionId === 'profile') renderProfilePage();
   // Show location banner for relevant sections
-if (['browse', 'report-lost', 'report-found'].includes(sectionId)) {
-  triggerLocationBanner();
-}
+  if (['browse', 'report-lost', 'report-found'].includes(sectionId)) {
+    triggerLocationBanner();
+  }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function toggleMobileMenu() {
   const menu = document.getElementById('mobileMenu');
-  const hmb  = document.getElementById('hamburger');
+  const hmb = document.getElementById('hamburger');
   if (!menu) return;
   menu.classList.toggle('open');
   hmb?.classList.toggle('open');
@@ -215,15 +215,15 @@ function toggleTheme() {
   const root = document.documentElement;
   const current = root.getAttribute('data-theme') || 'light';
   const next = current === 'light' ? 'dark' : 'light';
-  
+
   root.setAttribute('data-theme', next);
   localStorage.setItem('traceback_theme', next);
-  
+
   const themeBtn = document.getElementById('themeBtn');
   if (themeBtn) {
     themeBtn.textContent = next === 'light' ? '☀️' : '🌙';
   }
-  
+
   triggerToast(`Theme set to ${next} mode`, 'info');
 }
 
@@ -236,7 +236,7 @@ let uploadedPhotoFound = null;
 function setupDragAndDrop(dropAreaId, fileInputId, previewWrapId, previewImgId, prefix) {
   const dropArea = document.getElementById(dropAreaId);
   const fileInput = document.getElementById(fileInputId);
-  
+
   if (!dropArea || !fileInput) return;
 
   dropArea.addEventListener('click', () => fileInput.click());
@@ -382,7 +382,7 @@ function renderHomeFeed() {
   const allItems = getAllItems();
   const displayItems = allItems.slice(0, 6);
   const grid = document.getElementById('homeGrid');
-  
+
   if (!grid) return;
   grid.innerHTML = '';
 
@@ -423,7 +423,7 @@ function animateStatRoll(elemId, target) {
   function step(now) {
     const elapsed = now - start;
     const progress = Math.min(elapsed / duration, 1);
-    
+
     const ease = progress * (2 - progress);
     const value = Math.floor(current + (target - current) * ease);
 
@@ -640,7 +640,7 @@ function renderDashboardFeed() {
 
   allItems.forEach(item => {
     const tr = document.createElement('tr');
-    
+
     let dateText = '';
     if (item.date) {
       const d = new Date(item.date + 'T00:00:00');
@@ -711,7 +711,7 @@ function updateItemStatus(itemId, newStatus) {
       local[idx].status = newStatus;
       matchedName = local[idx].reporter;
       saveLocalItems(local);
-      
+
       const item = local[idx];
       logSystemEvent(item.type, item.name, `status updated to ${newStatus}`);
     }
@@ -721,7 +721,7 @@ function updateItemStatus(itemId, newStatus) {
     if (idx !== -1) {
       runtimeSimulatedItems[idx].status = newStatus;
       matchedName = runtimeSimulatedItems[idx].reporter;
-      
+
       const item = runtimeSimulatedItems[idx];
       logSystemEvent(item.type, item.name, `status updated to ${newStatus}`);
     }
@@ -882,7 +882,7 @@ function showClaimForm(itemId) {
 
 function submitItemClaim(e, itemId) {
   e.preventDefault();
-  
+
   const desc = document.getElementById('claim-desc');
   const email = document.getElementById('claim-email');
 
@@ -965,8 +965,8 @@ function startBackgroundSim() {
       const reporter = mockNames[Math.floor(Math.random() * mockNames.length)];
       const loc = mockLocations[Math.floor(Math.random() * mockLocations.length)];
       const cat = categoriesList[Math.floor(Math.random() * categoriesList.length)];
-      const itemTitle = isLost 
-        ? lostList[Math.floor(Math.random() * lostList.length)] 
+      const itemTitle = isLost
+        ? lostList[Math.floor(Math.random() * lostList.length)]
         : foundList[Math.floor(Math.random() * foundList.length)];
 
       const type = isLost ? 'lost' : 'found';
@@ -1074,7 +1074,7 @@ function validateField(inputEl, errorElId, isEmail = false) {
 
 function handleLostFormSubmit(e) {
   e.preventDefault();
-  
+
   const name = document.getElementById('l-name');
   const cat = document.getElementById('l-category');
   const desc = document.getElementById('l-desc');
@@ -1455,7 +1455,7 @@ async function fetchContributors() {
 
 // Hook into SPA router — call when contribute section becomes active
 const _origShowSection = showSection;
-window.showSection = function(id) {
+window.showSection = function (id) {
   _origShowSection(id);
   if (id === 'contribute') renderContributePage();
 };
@@ -1764,15 +1764,15 @@ function renderProfilePage() {
   if (avatarBig) avatarBig.textContent = (user.name || user.email || 'U')[0].toUpperCase();
 
   // Name & email
-  const nameEl  = document.getElementById('profileDisplayName');
+  const nameEl = document.getElementById('profileDisplayName');
   const emailEl = document.getElementById('profileDisplayEmail');
-  if (nameEl)  nameEl.textContent  = user.name  || 'User';
+  if (nameEl) nameEl.textContent = user.name || 'User';
   if (emailEl) emailEl.textContent = user.email || '—';
 
   // Pre-fill edit fields
-  const editName  = document.getElementById('editName');
+  const editName = document.getElementById('editName');
   const editEmail = document.getElementById('editEmail');
-  if (editName)  editName.value  = user.name  || '';
+  if (editName) editName.value = user.name || '';
   if (editEmail) editEmail.value = user.email || '';
 
   // Stats
@@ -1784,15 +1784,15 @@ function renderProfilePage() {
 
 function renderProfileStats(user) {
   const allItems = getAllItems();
-  const myItems  = allItems.filter(i =>
+  const myItems = allItems.filter(i =>
     i.email === user.email || i.reporter === 'You (Local Author)'
   );
 
   const points = myItems.reduce((sum, i) => {
     const s = (i.status || '').toLowerCase();
-    const t = (i.type   || '').toLowerCase();
+    const t = (i.type || '').toLowerCase();
     if (s === 'resolved') return sum + 15;
-    if (t === 'found')    return sum + 10;
+    if (t === 'found') return sum + 10;
     return sum + 5;
   }, 0);
 
@@ -1803,18 +1803,18 @@ function renderProfileStats(user) {
   const allUsers = JSON.parse(localStorage.getItem('tb_users') || '[]');
   const scored = allUsers.map(u => {
     const uItems = allItems.filter(i => i.email === u.email);
-    const uPts   = uItems.reduce((s, i) => {
+    const uPts = uItems.reduce((s, i) => {
       const st = (i.status || '').toLowerCase();
-      const tp = (i.type   || '').toLowerCase();
+      const tp = (i.type || '').toLowerCase();
       if (st === 'resolved') return s + 15;
-      if (tp === 'found')    return s + 10;
+      if (tp === 'found') return s + 10;
       return s + 5;
     }, 0);
     return { email: u.email, pts: uPts };
   }).sort((a, b) => b.pts - a.pts);
 
-  const rank    = scored.findIndex(u => u.email === user.email) + 1;
-  const rankEl  = document.getElementById('profileRank');
+  const rank = scored.findIndex(u => u.email === user.email) + 1;
+  const rankEl = document.getElementById('profileRank');
   if (rankEl) rankEl.textContent = rank > 0 ? rank : '—';
 }
 
@@ -1827,8 +1827,8 @@ function renderProfileItems(tab) {
     i.email === user.email || i.reporter === 'You (Local Author)'
   );
 
-  if (tab === 'lost')     items = items.filter(i => (i.type   || '').toLowerCase() === 'lost');
-  if (tab === 'found')    items = items.filter(i => (i.type   || '').toLowerCase() === 'found');
+  if (tab === 'lost') items = items.filter(i => (i.type || '').toLowerCase() === 'lost');
+  if (tab === 'found') items = items.filter(i => (i.type || '').toLowerCase() === 'found');
   if (tab === 'resolved') items = items.filter(i => (i.status || '').toLowerCase() === 'resolved');
 
   if (items.length === 0) {
@@ -1837,10 +1837,10 @@ function renderProfileItems(tab) {
   }
 
   grid.innerHTML = items.map(item => {
-    const status     = (item.status || item.type || 'lost').toLowerCase();
+    const status = (item.status || item.type || 'lost').toLowerCase();
     const badgeClass = status === 'found' ? 'found' : status === 'resolved' ? 'resolved' : 'lost';
-    const label      = badgeClass.charAt(0).toUpperCase() + badgeClass.slice(1);
-    const imgHtml    = item.photo
+    const label = badgeClass.charAt(0).toUpperCase() + badgeClass.slice(1);
+    const imgHtml = item.photo
       ? `<img src="${item.photo}" alt="${item.name || ''}" class="profile-item-img" />`
       : `<div class="profile-item-img-placeholder">${getItemEmoji(item.category)}</div>`;
 
@@ -1863,7 +1863,7 @@ function switchProfileTab(tab, el) {
 }
 
 function saveProfileInfo() {
-  const name  = document.getElementById('editName')?.value.trim();
+  const name = document.getElementById('editName')?.value.trim();
   const email = document.getElementById('editEmail')?.value.trim();
 
   if (!name || !email) {
@@ -1871,9 +1871,9 @@ function saveProfileInfo() {
     return;
   }
 
-  const user    = getCurrentUser();
-  const users   = JSON.parse(localStorage.getItem('tb_users') || '[]');
-  const idx     = users.findIndex(u => u.email === user.email);
+  const user = getCurrentUser();
+  const users = JSON.parse(localStorage.getItem('tb_users') || '[]');
+  const idx = users.findIndex(u => u.email === user.email);
   const updated = { ...user, name, email };
 
   if (idx > -1) users[idx] = { ...users[idx], name, email };
@@ -1886,9 +1886,9 @@ function saveProfileInfo() {
 }
 
 function saveNewPassword() {
-  const current  = document.getElementById('currentPw')?.value;
-  const newPw    = document.getElementById('newPw')?.value;
-  const confirm  = document.getElementById('confirmPw')?.value;
+  const current = document.getElementById('currentPw')?.value;
+  const newPw = document.getElementById('newPw')?.value;
+  const confirm = document.getElementById('confirmPw')?.value;
 
   if (!current || !newPw || !confirm) {
     triggerToast('Please fill all password fields.', 'error');
@@ -1903,9 +1903,9 @@ function saveNewPassword() {
     return;
   }
 
-  const user  = getCurrentUser();
+  const user = getCurrentUser();
   const users = JSON.parse(localStorage.getItem('tb_users') || '[]');
-  const idx   = users.findIndex(u => u.email === user.email);
+  const idx = users.findIndex(u => u.email === user.email);
 
   if (idx > -1 && users[idx].pw !== current) {
     triggerToast('Current password is incorrect.', 'error');
@@ -1916,7 +1916,7 @@ function saveNewPassword() {
   localStorage.setItem('tb_users', JSON.stringify(users));
 
   document.getElementById('currentPw').value = '';
-  document.getElementById('newPw').value     = '';
+  document.getElementById('newPw').value = '';
   document.getElementById('confirmPw').value = '';
 
   triggerToast('Password updated successfully! 🔒', 'success');
@@ -1926,8 +1926,8 @@ function confirmDeleteAccount() {
   const confirmed = confirm('Are you sure? This will permanently delete your account and all your reported items.');
   if (!confirmed) return;
 
-  const user    = getCurrentUser();
-  const users   = JSON.parse(localStorage.getItem('tb_users') || '[]');
+  const user = getCurrentUser();
+  const users = JSON.parse(localStorage.getItem('tb_users') || '[]');
   const filtered = users.filter(u => u.email !== user.email);
   localStorage.setItem('tb_users', JSON.stringify(filtered));
   localStorage.removeItem('tb_current_user');
@@ -1942,7 +1942,7 @@ function confirmDeleteAccount() {
 }
 function togglePasswordForm() {
   const form = document.getElementById('pwChangeForm');
-  const btn  = document.getElementById('togglePwBtn');
+  const btn = document.getElementById('togglePwBtn');
   const isHidden = form.classList.contains('pw-form-hidden');
 
   form.classList.toggle('pw-form-hidden', !isHidden);
@@ -1951,7 +1951,7 @@ function togglePasswordForm() {
   // Clear fields on close
   if (!isHidden) {
     document.getElementById('currentPw').value = '';
-    document.getElementById('newPw').value     = '';
+    document.getElementById('newPw').value = '';
     document.getElementById('confirmPw').value = '';
   }
 }
