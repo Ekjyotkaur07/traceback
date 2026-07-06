@@ -200,8 +200,12 @@ if (['browse', 'report-lost', 'report-found'].includes(sectionId)) {
 }
 
 function toggleMobileMenu() {
-  document.getElementById('mobileMenu').classList.toggle('open');
-  document.getElementById('hamburger').classList.toggle('open');
+  const menu = document.getElementById('mobileMenu');
+  const hmb  = document.getElementById('hamburger');
+  if (!menu) return;
+  menu.classList.toggle('open');
+  hmb?.classList.toggle('open');
+  menu.setAttribute('aria-hidden', menu.classList.contains('open') ? 'false' : 'true');
 }
 
 // ==========================================================================
