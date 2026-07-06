@@ -83,6 +83,8 @@ function closeAuthModal() {
   el.setAttribute('aria-hidden', 'true');
   document.body.style.overflow = '';
   resetOTPSteps();
+  // Move focus away before hiding
+  document.getElementById('nav-auth-area')?.querySelector('button, a')?.focus();
 }
 
 function wireAuthModal() {
@@ -474,4 +476,85 @@ function showAuthToast(msg, type = 'info', dur = 3500) {
   t.innerHTML = `<span>${icons[type]||'ℹ️'}</span><span style="flex:1;font-size:.84rem">${msg}</span>`;
   tc.appendChild(t);
   setTimeout(() => t.remove(), dur);
+}
+/* ══════════════════════════════
+   GOOGLE SIGN-IN (FIREBASE)
+══════════════════════════════ */
+function handleGoogleSignIn() {
+  if (!window.firebaseAuth || !window.googleProvider) {
+    showAuthToast('Google Sign-In not available.', 'error');
+    return;
+  }
+
+  window.firebaseAuth.signInWithPopup(window.googleProvider)
+    .then((result) => {
+      const user = result.user;
+      const userData = {
+        name:   user.displayName || 'Google User',
+        email:  user.email,
+        photo:  user.photoURL || null,
+        method: 'google',
+        uid:    user.uid
+      };
+
+      // Save to localStorage to match existing system
+      const users = getUsers();
+      const existing = users.find(u => u.email === user.email);
+      if (!existing) {
+        users.push({ ...userData, pw: null });
+        localStorage.setItem('tb_users', JSON.stringify(users));
+      }
+
+      setCurrentUser(userData);
+      closeAuthModal();
+      renderNavAuth();
+      showAuthToast(`Welcome, ${userData.name}! 🎉`, 'success');
+    })
+    .catch((error) => {
+      console.error('Google Sign-In error:', error);
+      if (error.code === 'auth/popup-closed-by-user') return;
+      showAuthToast('Google Sign-In failed. Try again.', 'error');
+    });
+}
+/* ══════════════════════════════
+   FORGOT PASSWORD
+══════════════════════════════ */
+function showForgotPassword() {
+  document.getElementById('panel-login').style.display = 'none';
+  document.getElementById('forgotStep').style.display = 'block';
+  document.getElementById('forgot-email').value = '';
+  clearAerr('err-forgot-email');
+}
+
+function hideForgotPassword() {
+  document.getElementById('forgotStep').style.display = 'none';
+  document.getElementById('panel-login').style.display = 'block';
+}
+
+function sendPasswordReset() {
+  const email = document.getElementById('forgot-email').value.trim();
+
+  if (!isEmail(email)) {
+    setAerr('err-forgot-email', 'Enter a valid email address');
+    return;
+  }
+  clearAerr('err-forgot-email');
+
+  if (!window.firebaseAuth) {
+    showAuthToast('Reset service unavailable.', 'error');
+    return;
+  }
+
+  window.firebaseAuth.sendPasswordResetEmail(email)
+    .then(() => {
+      showAuthToast('Reset link sent! Check your inbox 📧', 'success');
+      hideForgotPassword();
+    })
+    .catch((err) => {
+      if (err.code === 'auth/user-not-found') {
+        setAerr('err-forgot-email', 'No account found with this email');
+      } else {
+        showAuthToast('Failed to send reset email. Try again.', 'error');
+      }
+    });
 }
