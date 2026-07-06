@@ -3693,3 +3693,148 @@ html, body {
   gap: 0.75rem;
   flex-wrap: wrap;
 }
+/* ===== GOOGLE SIGN-IN BUTTON ===== */
+.btn-google {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 11px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
+  color: #334155;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-google:hover {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  transform: translateY(-1px);
+  border-color: #cbd5e1;
+}
+
+[data-theme="dark"] .btn-google {
+  background: #1e2737;
+  border-color: #2d3748;
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .btn-google:hover {
+  border-color: #4a5568;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 12px 0;
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+[data-theme="dark"] .auth-divider::before,
+[data-theme="dark"] .auth-divider::after {
+  background: #2d3748;
+}
+/* ===== FORGOT PASSWORD ===== */
+.forgot-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+  margin-top: -6px;
+}
+
+.forgot-link {
+  font-size: 0.78rem;
+  color: var(--accent-blue, #0ea5e9);
+  cursor: pointer;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.forgot-link:hover {
+  opacity: 0.8;
+}
+
+.forgot-step {
+  padding: 4px 0;
+}
+
+.forgot-back {
+  background: none;
+  border: none;
+  color: var(--accent-blue, #0ea5e9);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 1rem;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: opacity 0.2s;
+}
+
+.forgot-back:hover {
+  opacity: 0.75;
+}
+
+.forgot-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text, #0f172a);
+  margin-bottom: 0.4rem;
+  font-family: var(--font-head);
+}
+
+[data-theme="dark"] .forgot-title {
+  color: #f1f5f9;
+}
+
+.forgot-desc {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin-bottom: 1.25rem;
+  line-height: 1.5;
+}
+
+/* ===== MOBILE BACK ARROW ===== */
+.mob-back-row {
+  padding: 0.5rem 0 0.75rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.5rem;
+}
+
+.mob-back-btn {
+  background: none;
+  border: none;
+  color: var(--accent-blue, #0ea5e9);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0.25rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: opacity 0.2s;
+}
+
+.mob-back-btn:hover {
+  opacity: 0.75;
+}
