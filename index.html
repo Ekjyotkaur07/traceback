@@ -72,7 +72,172 @@
           <li>✓ Free forever</li>
         </ul>
       </div>
-      <!-- FORGOT PASSWORD STEP -->
+      
+      <!-- Right panel -->
+      <div class="auth-right">
+        <!-- Tab switcher -->
+        <div class="auth-tabs">
+          <button class="atab active" data-tab="login">Login</button>
+          <button class="atab" data-tab="signup">Sign Up</button>
+        </div>
+
+        <!-- LOGIN PANEL -->
+<div class="auth-panel active" id="panel-login">
+  <div class="method-switch">
+    <button class="meth active" data-method="email">📧 Email</button>
+    <button class="meth" data-method="phone">📱 Phone OTP</button>
+  </div>
+
+  <!-- Email login -->
+  <form id="login-email-form" class="aform active" data-form="email-login" novalidate>
+    <div class="agroup">
+      <label for="li-email">Email Address</label>
+      <input type="email" id="li-email" placeholder="you@example.com" required />
+      <span class="aerr" id="err-li-email"></span>
+    </div>
+    <div class="agroup">
+      <label for="li-pw">Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="li-pw" placeholder="••••••••" required />
+        <button type="button" class="pw-eye" data-target="li-pw">👁</button>
+      </div>
+      <span class="aerr" id="err-li-pw"></span>
+    </div>
+    <div class="forgot-row">
+      <a class="forgot-link" onclick="showForgotPassword()">Forgot password?</a>
+    </div>
+    <button type="submit" class="btn-auth">Login to TraceBack</button>
+    <div class="auth-divider"><span>or</span></div>
+    <button type="button" class="btn-google" onclick="handleGoogleSignIn()">
+      <svg width="18" height="18" viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        <path fill="none" d="M0 0h48v48H0z"/>
+      </svg>
+      Continue with Google
+    </button>
+  </form>
+
+  <!-- Phone OTP login -->
+  <form id="login-phone-form" class="aform" data-form="phone-login" novalidate>
+    <div class="agroup">
+      <label>Phone Number</label>
+      <div class="phone-inp-wrap">
+        <span class="phone-cc">🇮🇳 +91</span>
+        <input type="tel" id="li-phone" placeholder="98765 43210" maxlength="10" required />
+      </div>
+      <span class="aerr" id="err-li-phone"></span>
+    </div>
+    <button type="submit" class="btn-auth">Send OTP</button>
+  </form>
+
+  <!-- OTP verify - login -->
+  <div class="otp-step" id="otp-login-step" style="display:none">
+    <p class="otp-sent-msg" id="otp-login-msg">OTP sent!</p>
+    <div class="otp-boxes" id="otp-login-boxes">
+      <input class="otp-box" maxlength="1" inputmode="numeric" />
+      <input class="otp-box" maxlength="1" inputmode="numeric" />
+      <input class="otp-box" maxlength="1" inputmode="numeric" />
+      <input class="otp-box" maxlength="1" inputmode="numeric" />
+      <input class="otp-box" maxlength="1" inputmode="numeric" />
+      <input class="otp-box" maxlength="1" inputmode="numeric" />
+    </div>
+    <p class="resend-row">Didn't get it? <button class="resend-btn" id="resend-login">Resend OTP</button></p>
+    <button class="btn-auth" id="verify-login-otp">Verify & Login</button>
+  </div>
+</div>
+
+<!-- SIGNUP PANEL -->
+<div class="auth-panel" id="panel-signup">
+  <div class="method-switch">
+    <button class="meth active" data-method="email">📧 Email</button>
+    <button class="meth" data-method="phone">📱 Phone OTP</button>
+  </div>
+
+  <!-- Email signup -->
+  <form id="signup-email-form" class="aform active" data-form="email-signup" novalidate>
+    <div class="agroup">
+      <label for="su-name">Full Name</label>
+      <input type="text" id="su-name" placeholder="Your full name" required />
+      <span class="aerr" id="err-su-name"></span>
+    </div>
+    <div class="agroup">
+      <label for="su-email">Email Address</label>
+      <input type="email" id="su-email" placeholder="you@example.com" required />
+      <span class="aerr" id="err-su-email"></span>
+    </div>
+    <div class="agroup">
+      <label for="su-pw">Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="su-pw" placeholder="Min 6 characters" required />
+        <button type="button" class="pw-eye" data-target="su-pw">👁</button>
+      </div>
+      <div class="pw-strength">
+        <div class="pw-bar">
+          <div class="pw-fill" id="pw-fill"></div>
+        </div>
+        <span class="pw-label" id="pw-label">—</span>
+      </div>
+      <span class="aerr" id="err-su-pw"></span>
+    </div>
+    <div class="agroup">
+      <label>Phone Number <span style="color:#ef4444">*</span></label>
+      <div class="phone-inp-wrap">
+        <span class="phone-cc">🇮🇳 +91</span>
+        <input type="tel" id="su-ph-email" placeholder="98765 43210" maxlength="10" required />
+      </div>
+      <span class="aerr" id="err-su-ph-email"></span>
+    </div>
+    <button type="submit" class="btn-auth">Create Account</button>
+    <div class="auth-divider"><span>or</span></div>
+    <button type="button" class="btn-google" onclick="handleGoogleSignIn()">
+      <svg width="18" height="18" viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        <path fill="none" d="M0 0h48v48H0z"/>
+      </svg>
+      Continue with Google
+    </button>
+  </form>
+
+  <!-- Phone signup -->
+  <form id="signup-phone-form" class="aform" data-form="phone-signup" novalidate>
+    <div class="agroup">
+      <label for="su-ph-name">Full Name</label>
+      <input type="text" id="su-ph-name" placeholder="Your full name" required />
+      <span class="aerr" id="err-su-ph-name"></span>
+    </div>
+    <div class="agroup">
+      <label>Phone Number</label>
+      <div class="phone-inp-wrap">
+        <span class="phone-cc">🇮🇳 +91</span>
+        <input type="tel" id="su-phone" placeholder="98765 43210" maxlength="10" required />
+      </div>
+      <span class="aerr" id="err-su-phone"></span>
+    </div>
+    <button type="submit" class="btn-auth">Send OTP</button>
+  </form>
+
+  <!-- OTP verify - signup -->
+  <div class="otp-step" id="otp-signup-step" style="display:none">
+    <p class="otp-sent-msg" id="otp-signup-msg">OTP sent!</p>
+    <div class="otp-boxes" id="otp-signup-boxes">
+      <input class="otp-box" maxlength="1" inputmode="numeric" />
+      <input class="otp-box" maxlength="1" inputmode="numeric" />
+      <input class="otp-box" maxlength="1" inputmode="numeric" />
+      <input class="otp-box" maxlength="1" inputmode="numeric" />
+      <input class="otp-box" maxlength="1" inputmode="numeric" />
+      <input class="otp-box" maxlength="1" inputmode="numeric" />
+    </div>
+    <p class="resend-row">Didn't get it? <button class="resend-btn" id="resend-signup">Resend OTP</button></p>
+    <button class="btn-auth" id="verify-signup-otp">Verify & Sign Up</button>
+  </div>
+</div>
+<!-- FORGOT PASSWORD STEP -->
       <div class="forgot-step" id="forgotStep" style="display:none">
         <button class="forgot-back" onclick="hideForgotPassword()">← Back to Login</button>
         <h3 class="forgot-title">Reset Password</h3>
@@ -87,184 +252,10 @@
         </div>
         <button class="btn-auth" onclick="sendPasswordReset()">Send Reset Link</button>
       </div>
-      <!-- Right panel -->
-      <div class="auth-right">
-        <!-- Tab switcher -->
-        <div class="auth-tabs">
-          <button class="atab active" data-tab="login">Login</button>
-          <button class="atab" data-tab="signup">Sign Up</button>
-        </div>
 
-        <!-- LOGIN PANEL -->
-        <div class="auth-panel active" id="panel-login">
-          <!-- Method switch -->
-          <div class="method-switch">
-            <button class="meth active" data-method="email">📧 Email</button>
-            <button class="meth" data-method="phone">📱 Phone OTP</button>
-          </div>
-
-          <!-- Email login -->
-          <form id="login-email-form" class="aform active" data-form="email-login" novalidate>
-            <div class="agroup">
-              <label for="li-email">Email Address</label>
-              <input type="email" id="li-email" placeholder="you@example.com" required />
-              <span class="aerr" id="err-li-email"></span>
-            </div>
-            <div class="agroup">
-              <label for="li-pw">Password</label>
-              <div class="pw-wrap">
-                <input type="password" id="li-pw" placeholder="••••••••" required />
-                <button type="button" class="pw-eye" data-target="li-pw">👁</button>
-              </div>
-              <span class="aerr" id="err-li-pw"></span>
-            </div>
-            <div class="forgot-row">
-              <a class="forgot-link" onclick="showForgotPassword()">Forgot password?</a>
-            </div>
-            <button type="submit" class="btn-auth">Login to TraceBack</button>
-            <div class="auth-divider"><span>or</span></div>
-
-
-            </button>
-            <button type="button" class="btn-google" onclick="handleGoogleSignIn()">
-              <svg width="18" height="18" viewBox="0 0 48 48">
-                <path fill="#EA4335"
-                  d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
-                <path fill="#4285F4"
-                  d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
-                <path fill="#FBBC05"
-                  d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
-                <path fill="#34A853"
-                  d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
-                <path fill="none" d="M0 0h48v48H0z" />
-              </svg>
-              Continue with Google
-            </button>
-          </form>
-
-          <!-- Phone OTP login - step 1 -->
-          <form id="login-phone-form" class="aform" data-form="phone-login" novalidate>
-            <div class="agroup">
-              <label>Phone Number</label>
-              <div class="phone-inp-wrap">
-                <span class="phone-cc">🇮🇳 +91</span>
-                <input type="tel" id="li-phone" placeholder="98765 43210" maxlength="10" required />
-              </div>
-              <span class="aerr" id="err-li-phone"></span>
-            </div>
-            <button type="submit" class="btn-auth">Send OTP</button>
-          </form>
-
-          <!-- OTP verify - login -->
-          <div class="otp-step" id="otp-login-step" style="display:none">
-            <p class="otp-sent-msg" id="otp-login-msg">OTP sent!</p>
-            <div class="otp-boxes" id="otp-login-boxes">
-              <input class="otp-box" maxlength="1" inputmode="numeric" />
-              <input class="otp-box" maxlength="1" inputmode="numeric" />
-              <input class="otp-box" maxlength="1" inputmode="numeric" />
-              <input class="otp-box" maxlength="1" inputmode="numeric" />
-              <input class="otp-box" maxlength="1" inputmode="numeric" />
-              <input class="otp-box" maxlength="1" inputmode="numeric" />
-            </div>
-            <p class="resend-row">Didn't get it? <button class="resend-btn" id="resend-login">Resend OTP</button></p>
-            <button class="btn-auth" id="verify-login-otp">Verify & Login</button>
-          </div>
-        </div>
-
-        <!-- SIGNUP PANEL -->
-        <div class="auth-panel" id="panel-signup">
-          <div class="method-switch">
-            <button class="meth active" data-method="email">📧 Email</button>
-            <button class="meth" data-method="phone">📱 Phone OTP</button>
-          </div>
-
-          <!-- Email signup -->
-          <form id="signup-email-form" class="aform active" data-form="email-signup" novalidate>
-            <div class="agroup">
-              <label for="su-name">Full Name</label>
-              <input type="text" id="su-name" placeholder="Your full name" required />
-              <span class="aerr" id="err-su-name"></span>
-            </div>
-            <div class="agroup">
-              <label for="su-email">Email Address</label>
-              <input type="email" id="su-email" placeholder="you@example.com" required />
-              <span class="aerr" id="err-su-email"></span>
-            </div>
-            <div class="agroup">
-              <label for="su-pw">Password</label>
-              <div class="pw-wrap">
-                <input type="password" id="su-pw" placeholder="Min 6 characters" required />
-                <button type="button" class="pw-eye" data-target="su-pw">👁</button>
-              </div>
-              <div class="agroup">
-                <label>Phone Number <span style="color:#ef4444">*</span></label>
-                <div class="phone-inp-wrap">
-                  <span class="phone-cc">🇮🇳 +91</span>
-                  <input type="tel" id="su-ph-email" placeholder="98765 43210" maxlength="10" required />
-                </div>
-                <span class="aerr" id="err-su-ph-email"></span>
-              </div>
-              <!-- PASSWORD STRENGTH CHECKER -->
-              <div class="pw-strength">
-                <div class="pw-bar">
-                  <div class="pw-fill" id="pw-fill"></div>
-                </div>
-                <span class="pw-label" id="pw-label">—</span>
-              </div>
-              <span class="aerr" id="err-su-pw"></span>
-            </div>
-            <button type="submit" class="btn-auth">Create Account</button>
-            <div class="auth-divider"><span>or</span></div>
-            <button type="button" class="btn-google" onclick="handleGoogleSignIn()">
-              <svg width="18" height="18" viewBox="0 0 48 48">
-                <path fill="#EA4335"
-                  d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
-                <path fill="#4285F4"
-                  d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
-                <path fill="#FBBC05"
-                  d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
-                <path fill="#34A853"
-                  d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
-                <path fill="none" d="M0 0h48v48H0z" />
-              </svg>
-              Continue with Google
-            </button>
-          </form>
-
-          <!-- Phone signup -->
-          <form id="signup-phone-form" class="aform" data-form="phone-signup" novalidate>
-            <div class="agroup">
-              <label for="su-ph-name">Full Name</label>
-              <input type="text" id="su-ph-name" placeholder="Your full name" required />
-              <span class="aerr" id="err-su-ph-name"></span>
-            </div>
-            <div class="agroup">
-              <label>Phone Number</label>
-              <div class="phone-inp-wrap">
-                <span class="phone-cc">🇮🇳 +91</span>
-                <input type="tel" id="su-phone" placeholder="98765 43210" maxlength="10" required />
-              </div>
-              <span class="aerr" id="err-su-phone"></span>
-            </div>
-            <button type="submit" class="btn-auth">Send OTP</button>
-          </form>
-
-          <!-- OTP verify - signup -->
-          <div class="otp-step" id="otp-signup-step" style="display:none">
-            <p class="otp-sent-msg" id="otp-signup-msg">OTP sent!</p>
-            <div class="otp-boxes" id="otp-signup-boxes">
-              <input class="otp-box" maxlength="1" inputmode="numeric" />
-              <input class="otp-box" maxlength="1" inputmode="numeric" />
-              <input class="otp-box" maxlength="1" inputmode="numeric" />
-              <input class="otp-box" maxlength="1" inputmode="numeric" />
-              <input class="otp-box" maxlength="1" inputmode="numeric" />
-              <input class="otp-box" maxlength="1" inputmode="numeric" />
-            </div>
-            <p class="resend-row">Didn't get it? <button class="resend-btn" id="resend-signup">Resend OTP</button></p>
-            <button class="btn-auth" id="verify-signup-otp">Verify & Sign Up</button>
-          </div>
-        </div>
-
+    </div><!-- /auth-right -->
+    </div><!-- /auth-modal -->
+  </div><!-- /auth-overlay -->
       </div><!-- /auth-right -->
     </div><!-- /auth-modal -->
   </div><!-- /auth-overlay -->
@@ -1221,6 +1212,7 @@
   <script src="firebase-init.js"></script>
   <script src="auth.js"></script>
   <script src="script.js"></script>
+  <div id="recaptcha-container"></div>
 </body>
 
 </html>

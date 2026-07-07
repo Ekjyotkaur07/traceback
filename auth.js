@@ -332,13 +332,12 @@ function handleEmailSignup(e) {
   showAuthToast(`Account created! Welcome, ${name}! 🎉`, 'success');
 }
 
-/* ── Phone — Send OTP ── */
 function handlePhoneSend(e) {
   e.preventDefault();
-  const isSignup = e.target.id === 'signup-phone-form';
-  const nameInp = isSignup ? document.getElementById('su-ph-name') : null;
-  const phoneInp = document.getElementById(isSignup ? 'su-phone' : 'li-phone');
-  const nameErrId = 'err-su-ph-name';
+  const isSignup   = e.target.id === 'signup-phone-form';
+  const nameInp    = isSignup ? document.getElementById('su-ph-name') : null;
+  const phoneInp   = document.getElementById(isSignup ? 'su-phone' : 'li-phone');
+  const nameErrId  = 'err-su-ph-name';
   const phoneErrId = isSignup ? 'err-su-phone' : 'err-li-phone';
   let ok = true;
 
@@ -346,73 +345,97 @@ function handlePhoneSend(e) {
     setAerr(nameErrId, 'Name is required'); ok = false;
   } else clearAerr(nameErrId);
 
-  const phone = phoneInp?.value.replace(/\D/g, '');
+  const phone = phoneInp?.value.replace(/\D/g,'');
   if (!phone || phone.length !== 10) {
     setAerr(phoneErrId, 'Enter a valid 10-digit number'); ok = false;
   } else clearAerr(phoneErrId);
   if (!ok) return;
 
-  const otp = generateOTP();
-  pendingOTP = otp;
+  const fullPhone = '+91' + phone;
+
   pendingUserData = {
-    name: isSignup ? nameInp.value.trim() : `User${phone.slice(-4)}`,
-    phone: '+91' + phone,
+    name:   isSignup ? nameInp.value.trim() : `User${phone.slice(-4)}`,
+    phone:  fullPhone,
     method: 'phone'
   };
 
-  // FIX: Use a real email field for signup, fall back to console for phone-only login
-  const toEmail = isSignup
-    ? (document.getElementById('su-ph-email-addr')?.value.trim() || null)
-    : null;
-
-  if (toEmail) {
-    emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
-      to_email: toEmail,
-      to_name: pendingUserData.name,
-      otp_code: otp
-    }).then(() => {
-      showAuthToast('OTP sent to your email inbox!', 'success');
-    }).catch(() => {
-      showAuthToast(`Email failed — OTP: ${otp} (check console)`, 'warning');
-      console.info('%c[OTP] ' + otp, 'color:#0ea5e9;font-size:1.2rem;font-weight:bold');
+  // Setup reCAPTCHA
+  if (!window.recaptchaVerifier) {
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+      size: 'invisible',
+      callback: () => {}
     });
-  } else {
-    // Phone-only flow: show OTP in toast/console for demo
-    showAuthToast(`Demo OTP: ${otp}`, 'info', 8000);
-    console.info('%c[TraceBack OTP] ' + otp, 'color:#0ea5e9;font-size:1.2rem;font-weight:bold');
   }
 
-  const stepId = isSignup ? 'otp-signup-step' : 'otp-login-step';
-  const msgId = isSignup ? 'otp-signup-msg' : 'otp-login-msg';
-  const formId = isSignup ? 'signup-phone-form' : 'login-phone-form';
+  showAuthToast('Sending OTP...', 'info');
 
-  document.getElementById(formId).style.display = 'none';
-  document.getElementById(stepId).style.display = 'block';
-  document.getElementById(msgId).textContent =
-    `OTP sent to +91 ${phone.slice(0, 5)} ${phone.slice(5)}`;
-  clearOTPBoxes(isSignup ? 'otp-signup-boxes' : 'otp-login-boxes');
+  window.firebaseAuth.signInWithPhoneNumber(fullPhone, window.recaptchaVerifier)
+    .then(confirmationResult => {
+      window.confirmationResult = confirmationResult;
+
+      const stepId = isSignup ? 'otp-signup-step' : 'otp-login-step';
+      const msgId  = isSignup ? 'otp-signup-msg'  : 'otp-login-msg';
+      const formId = isSignup ? 'signup-phone-form' : 'login-phone-form';
+
+      document.getElementById(formId).style.display = 'none';
+      document.getElementById(stepId).style.display  = 'block';
+      document.getElementById(msgId).textContent =
+        `OTP sent to +91 ${phone.slice(0,5)} ${phone.slice(5)}`;
+      clearOTPBoxes(isSignup ? 'otp-signup-boxes' : 'otp-login-boxes');
+      showAuthToast('OTP sent to your phone! 📱', 'success');
+    })
+    .catch(err => {
+      console.error('OTP error:', err);
+      showAuthToast('Failed to send OTP. Check your number and try again.', 'error');
+      // Reset reCAPTCHA on error
+      window.recaptchaVerifier.render().then(widgetId => {
+        grecaptcha.reset(widgetId);
+      });
+    });
 }
 
 /* ── OTP Verify ── */
 function handleOTPVerify(mode) {
   const isSignup = mode === 'signup';
-  const boxesId = isSignup ? 'otp-signup-boxes' : 'otp-login-boxes';
-  const entered = getOTP(boxesId);
+  const boxesId  = isSignup ? 'otp-signup-boxes' : 'otp-login-boxes';
+  const entered  = getOTP(boxesId);
 
   if (entered.length < 6) { showAuthToast('Enter all 6 digits', 'error'); return; }
-  if (entered !== pendingOTP) {
-    document.getElementById(boxesId)?.classList.add('shake');
-    setTimeout(() => document.getElementById(boxesId)?.classList.remove('shake'), 500);
-    showAuthToast('Incorrect OTP. Try again.', 'error');
+
+  if (!window.confirmationResult) {
+    showAuthToast('Session expired. Please request OTP again.', 'error');
     return;
   }
 
-  setCurrentUser(pendingUserData);
-  pendingOTP = null;
-  pendingUserData = null;
-  closeAuthModal();
-  renderNavAuth();
-  showAuthToast(`${isSignup ? 'Welcome aboard' : 'Welcome back'}, ${getCurrentUser().name}! 👋`, 'success');
+  window.confirmationResult.confirm(entered)
+    .then(result => {
+      const user = result.user;
+      const userData = {
+        name:   pendingUserData?.name || `User${user.phoneNumber.slice(-4)}`,
+        phone:  user.phoneNumber,
+        method: 'phone',
+        uid:    user.uid
+      };
+
+      const users = getUsers();
+      if (!users.find(u => u.phone === user.phoneNumber)) {
+        users.push({ ...userData, pw: null });
+        localStorage.setItem('tb_users', JSON.stringify(users));
+      }
+
+      setCurrentUser(userData);
+      pendingOTP      = null;
+      pendingUserData = null;
+      closeAuthModal();
+      renderNavAuth();
+      showAuthToast(`${isSignup ? 'Welcome aboard' : 'Welcome back'}, ${userData.name}! 👋`, 'success');
+    })
+    .catch(err => {
+      console.error('OTP verify error:', err);
+      document.getElementById(boxesId)?.classList.add('shake');
+      setTimeout(() => document.getElementById(boxesId)?.classList.remove('shake'), 500);
+      showAuthToast('Incorrect OTP. Try again.', 'error');
+    });
 }
 
 /* ══════════════════════════════
@@ -545,10 +568,30 @@ function sendPasswordReset() {
     return;
   }
 
-  window.firebaseAuth.sendPasswordResetEmail(email)
+  const actionSettings = {
+    url: window.location.origin + window.location.pathname,
+    handleCodeInApp: false
+  };
+
+  window.firebaseAuth.sendPasswordResetEmail(email, actionSettings)
     .then(() => {
-      showAuthToast('Reset link sent! Check your inbox 📧', 'success');
-      hideForgotPassword();
+      // Show success message in UI
+      const forgotStep = document.getElementById('forgotStep');
+      if (forgotStep) {
+        forgotStep.innerHTML = `
+          <div class="forgot-success">
+            <div class="forgot-success-icon">📧</div>
+            <h3 class="forgot-title">Check your inbox!</h3>
+            <p class="forgot-desc">
+              We sent a password reset link to <b>${email}</b>.<br/>
+              If you don't see it, <b>check your spam or junk folder</b>.
+            </p>
+            <button class="btn-auth" style="margin-top:1rem" onclick="hideForgotPassword()">
+              Back to Login
+            </button>
+          </div>
+        `;
+      }
     })
     .catch((err) => {
       if (err.code === 'auth/user-not-found') {

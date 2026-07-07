@@ -7,18 +7,20 @@ const JSONBIN_ID = '6a115d9a6610dd3ae8907122';
 const JSONBIN_KEY = '$2a$10$UyjgA1CZ0XZtRql8RhKS5.xJvUb645ZQVwE/FTrCXy2bpf9bvta7G';
 // Emojis mapping for categories
 const CATEGORY_EMOJIS = {
-  'ID Card / Documents': '🪪',
-  'Wallet / Purse': '👛',
-  'Mobile Phone': '📱',
-  'Keys': '🔑',
-  'Earphones / Headphones': '🎧',
-  'Bag / Backpack': '🎒',
-  'Laptop / Tablet': '💻',
-  'Clothing / Accessories': '👗',
-  'Books / Stationery': '📚',
-  'Glasses / Sunglasses': '👓',
-  'Jewellery / Watch': '💍',
-  'Other': '📦'
+  'documents':      '📄',
+    'wallet/purse':   '👛',
+    'mobile phone':   '📱',
+    'keys':           '🗝️',
+    'headphones':     '🎧',
+    'backpack':       '🎒',
+    'laptop/tablet':  '💻',
+    'clothing':       '👕',
+    'stationery':     '✏️',
+    'glasses':        '🕶️',
+    'accessories':    '⌚',
+    'jewellery':      '💍',
+    'watch':          '⌚',
+    'other':          '📦'
 };
 
 // Avatar generator helper based on reporter name characters
