@@ -691,45 +691,44 @@
 
     <!-- 5. REPORT FOUND FORM SECTION -->
     <section id="report-found" class="page">
-      <div class="form-wrapper">
-        <div class="form-header">
-          <div class="form-icon-header found-color">🟢</div>
-          <h2>Report Found Item</h2>
-          <p>Found something? Help return it by logging its specifications details.</p>
-        </div>
+  <div class="form-wrapper">
+    <div class="form-header">
+      <div class="form-icon-header found-color">🟢</div>
+      <h2>Report Found Item</h2>
+      <p>Found something? Help return it by logging its specifications details.</p>
+    </div>
 
-        <div class="form-card">
-          <form id="foundForm" novalidate>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="f-name">Item Name <span class="required">*</span></label>
-                <input type="text" id="f-name" placeholder="e.g. Gold Rim Sunglasses" required />
-
-              </div> <span class="field-error" id="f-name-err">Please enter the item name.</span>
+    <div class="form-card">
+      <form id="foundForm" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="f-name">Item Name <span class="required">*</span></label>
+            <input type="text" id="f-name" placeholder="e.g. Gold Rim Sunglasses" required />
+            <span class="field-error" id="f-name-err">Please enter the item name.</span>
+          </div>
+          <div class="form-group">
+            <label for="f-category">Category <span class="required">*</span></label>
+            <div class="select-wrapper">
+              <select id="f-category" required>
+                <option value="">Select Category</option>
+                <option>Documents</option>
+                <option>Wallet/Purse</option>
+                <option>Mobile Phone</option>
+                <option>Keys</option>
+                <option>Headphones</option>
+                <option>Backpack</option>
+                <option>Laptop/Tablet</option>
+                <option>Clothing</option>
+                <option>Stationery</option>
+                <option>Accessories</option>
+                <option>Glasses</option>
+                <option>Jewellery</option>
+                <option>Watch</option>
+                <option>Other</option>
+              </select>
             </div>
-            <div class="form-group">
-              <label for="f-category">Category <span class="required">*</span></label>
-              <div class="select-wrapper">
-                <select id="f-category" required>
-                  <option value="">Select Category</option>
-                    <option>Documents</option>
-                    <option>Wallet/Purse</option>
-                    <option>Mobile Phone</option>
-                    <option>Keys</option>
-                    <option>Headphones</option>
-                    <option>Backpack</option>
-                    <option>Laptop/Tablet</option>
-                    <option>Clothing</option>
-                    <option>Stationery</option>
-                    <option>Accessories</option>
-                    <option>Glasses</option>
-                    <option>Jewellery</option>
-                    <option>Watch</option>
-                    <option>Other</option>
-                </select>
-              </div>
-              <span class="field-error" id="f-category-err">Please select a category.</span>
-            </div>
+            <span class="field-error" id="f-category-err">Please select a category.</span>
+          </div>
         </div>
 
         <div class="form-group">
@@ -771,8 +770,7 @@
         </div>
 
         <div class="form-group">
-          <label>Item Photograph <span class="required">*</span> <span class="req-note">— Proof required for Found
-              items</span></label>
+          <label>Item Photograph <span class="required-star">*</span> <span class="req-note">— Proof required for Found items</span></label>
           <div class="photo-upload-area" id="f-drop">
             <input type="file" id="f-photo" class="file-input-field" accept="image/*" required />
             <div id="f-drop-instructions">
@@ -782,8 +780,7 @@
             </div>
             <div class="photo-preview-wrap" id="f-preview-wrap" style="display: none;">
               <img id="f-preview" src="" alt="Found Image Preview" />
-              <button type="button" class="remove-photo-btn" onclick="removePhoto('f'); event.stopPropagation();">✕
-                Remove</button>
+              <button type="button" class="remove-photo-btn" onclick="removePhoto('f'); event.stopPropagation();">✕ Remove</button>
             </div>
           </div>
           <span class="field-error" id="f-photo-err">Photo proof is mandatory for found submissions.</span>
@@ -792,10 +789,10 @@
         <button type="submit" class="btn btn-found btn-full btn-submit" style="margin-top: 1.5rem;">
           Submit Found Report ⟳
         </button>
-        </form>
-      </div>
-      </div>
-    </section>
+      </form>
+    </div>
+  </div>
+</section>
 
 
     <!-- 6. CONTACT US SECTION (NEW FEATURE) -->
