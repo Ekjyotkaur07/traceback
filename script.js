@@ -1138,7 +1138,7 @@ function handleLostFormSubmit(e) {
 
 function handleFoundFormSubmit(e) {
   e.preventDefault();
-
+  
   const name = document.getElementById('f-name');
   const cat = document.getElementById('f-category');
   const desc = document.getElementById('f-desc');
