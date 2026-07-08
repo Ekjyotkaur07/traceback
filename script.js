@@ -1356,13 +1356,23 @@ function timeAgo(dateStr) {
 }
 
 function renderHeroFloatCards() {
-  const all = getAllItems(); // uses your existing function
+  const all = getAllItems();
   if (!all || all.length === 0) return;
 
-  // Sort by date descending, take latest 3
-  const latest = [...all]
-    .sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt))
-    .slice(0, 3);
+  const sorted = [...all].sort((a, b) => 
+    new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt)
+  );
+
+  // Pick one of each type
+  const lostItem     = sorted.find(i => (i.type || '').toLowerCase() === 'lost');
+  const foundItem    = sorted.find(i => (i.type || '').toLowerCase() === 'found');
+  const resolvedItem = sorted.find(i => (i.status || '').toLowerCase() === 'resolved');
+
+  const picks = [
+    { item: lostItem,     badgeClass: 'lost',     label: 'Lost'     },
+    { item: foundItem,    badgeClass: 'found',    label: 'Found'    },
+    { item: resolvedItem, badgeClass: 'resolved', label: 'Resolved' }
+  ];
 
   const slots = [
     document.querySelector('.float-card.fc1'),
@@ -1370,19 +1380,23 @@ function renderHeroFloatCards() {
     document.querySelector('.float-card.fc3')
   ];
 
-  latest.forEach((item, i) => {
+  picks.forEach(({ item, badgeClass, label }, i) => {
     if (!slots[i]) return;
-    const status = (item.status || item.type || 'lost').toLowerCase();
-    const badgeClass = status === 'found' ? 'found' : status === 'resolved' ? 'resolved' : 'lost';
-    const badgeLabel = badgeClass.charAt(0).toUpperCase() + badgeClass.slice(1);
-
+    if (!item) {
+      slots[i].innerHTML = `
+        <span class="fc-ico">📦</span>
+        <div class="fc-info"><b>No ${label} items</b><span>—</span></div>
+        <span class="badge ${badgeClass}">${label}</span>
+      `;
+      return;
+    }
     slots[i].innerHTML = `
       <span class="fc-ico">${getItemEmoji(item.category)}</span>
       <div class="fc-info">
         <b>${item.title || item.name || 'Unknown Item'}</b>
-        <span>${item.location || 'Unknown location'} · ${timeAgo(item.date || item.createdAt)}</span>
+        <span>${item.location || '—'} · ${timeAgo(item.date || item.createdAt)}</span>
       </div>
-      <span class="badge ${badgeClass}">${badgeLabel}</span>
+      <span class="badge ${badgeClass}">${label}</span>
     `;
   });
 }
